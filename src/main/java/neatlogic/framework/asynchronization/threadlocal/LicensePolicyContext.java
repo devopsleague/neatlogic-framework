@@ -25,9 +25,9 @@ import java.util.Map;
 public class LicensePolicyContext {
     private static final ThreadLocal<LicensePolicyContext> instance = new ThreadLocal<>();
 
-    private Map<String,Map<String,Long>> sqlPolicyValue = new HashMap<>();
+    private Map<String,Long> sqlPolicyValue = new HashMap<>();
 
-    public static LicensePolicyContext init( Map<String,Map<String,Long>> sqlPolicyValue ) {
+    public static LicensePolicyContext init( Map<String,Long> sqlPolicyValue ) {
         LicensePolicyContext context = new LicensePolicyContext();
         if (MapUtils.isNotEmpty(sqlPolicyValue)) {
             context.sqlPolicyValue = sqlPolicyValue;
@@ -48,11 +48,11 @@ public class LicensePolicyContext {
 
     }
 
-    public Map<String, Map<String, Long>> getSqlPolicyValue() {
+    public  Map<String, Long> getSqlPolicyValue() {
         return sqlPolicyValue;
     }
 
-    public void setSqlPolicyValue(Map<String, Map<String, Long>> sqlPolicyValue) {
+    public void setSqlPolicyValue(Map<String, Long> sqlPolicyValue) {
         this.sqlPolicyValue = sqlPolicyValue;
     }
 }

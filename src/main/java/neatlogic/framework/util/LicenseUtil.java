@@ -43,6 +43,9 @@ public class LicenseUtil {
      * @param licenseStr license串
      */
     public static LicenseVo deLicense(String licenseStr, String licencePK) {
+        if(StringUtils.isBlank(licenseStr)){
+            return null;
+        }
         licenseStr = licenseStr.replaceAll("\\r\\n", StringUtils.EMPTY).replaceAll("\\n", StringUtils.EMPTY).trim();
         String[] licenses = licenseStr.split("#");
         if (licenses.length != 2) {

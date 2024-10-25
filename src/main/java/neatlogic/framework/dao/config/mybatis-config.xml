@@ -18,6 +18,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.-->
         PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-config.dtd">
 <configuration>
+    <settings>
+        <!-- 指定自定义的 LanguageDriver -->
+        <setting name="defaultScriptingLanguage" value="neatlogic.framework.dao.node.NeatlogicLanguageDriver"/>
+    </settings>
     <typeAliases>
         <typeAlias type="neatlogic.framework.dao.plugin.CompressHandler" alias="CompressHandler"/>
         <typeAlias type="neatlogic.framework.dao.plugin.Md5Handler" alias="Md5Handler"/>
@@ -35,6 +39,5 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.-->
         <plugin interceptor="neatlogic.framework.dao.plugin.SqlSessionCacheClearInterceptor"/>
         <plugin interceptor="neatlogic.framework.dao.plugin.ExceptionCatchInterceptor"/>
         <plugin interceptor="neatlogic.framework.dao.plugin.BaseEditorVoParameterInterceptor"/>
-        <plugin interceptor="neatlogic.framework.dao.plugin.LicensePolicyInterceptor"/>
     </plugins>
 </configuration>
