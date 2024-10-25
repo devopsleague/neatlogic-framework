@@ -195,6 +195,7 @@ public class Config {
             ENABLE_MAINTENANCE = false;
         }
 
+        System.setProperty("javax.xml.accessExternalDTD", "all" );//解决mapper引入classpath：dtd问题
     }
 
     public static String NEATLOGIC_HOME() {
