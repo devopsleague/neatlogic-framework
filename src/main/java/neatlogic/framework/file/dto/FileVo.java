@@ -66,12 +66,22 @@ public class FileVo extends BaseEditorVo {
     private String url;
     @JSONField(serialize = false)
     private List<Map<String, String>> sortList;//排序设置
+    @EntityField(name = "分析结果")
+    private JSONObject analyzedResult;
 
     public Long getId() {
         if (id == null) {
             id = SnowflakeUtil.uniqueLong();
         }
         return id;
+    }
+
+    public JSONObject getAnalyzedResult() {
+        return analyzedResult;
+    }
+
+    public void setAnalyzedResult(JSONObject analyzedResult) {
+        this.analyzedResult = analyzedResult;
     }
 
     public String getTypeText() {
@@ -169,7 +179,7 @@ public class FileVo extends BaseEditorVo {
     }
 
     public String getType() {
-        if(StringUtils.isNotBlank(type)){
+        if (StringUtils.isNotBlank(type)) {
             return type.toLowerCase();
         }
         return type;
@@ -207,7 +217,7 @@ public class FileVo extends BaseEditorVo {
     }
 
     public String getPathName() {
-        if(StringUtils.isBlank(pathName)){
+        if (StringUtils.isBlank(pathName)) {
             pathName = getId().toString();
         }
         return pathName;

@@ -32,12 +32,14 @@ public interface IFileTypeHandler {
 
     /**
      * 校验附件是否允许删除
+     *
      * @param fileVo 附件信息
      * @return
      */
     default boolean validDeleteFile(FileVo fileVo) {
         return false;
     }
+
     /**
      * 文件名是否唯一，如果返回true，相同名字的文件会被新文件覆盖
      *
@@ -91,7 +93,7 @@ public interface IFileTypeHandler {
     /**
      * 分析附件，一般在导入或分析的场景使用，支持流式处理附件内容，由于文件流只能读一次，所以要配合needSave=false使用
      */
-    default void analyze(MultipartFile multipartFile, JSONObject paramObj) throws Exception {
-
+    default JSONObject analyze(MultipartFile multipartFile, JSONObject paramObj) throws Exception {
+        return null;
     }
 }
