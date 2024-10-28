@@ -328,7 +328,7 @@ public class ViewDataSourceHandler extends MatrixDataSourceHandlerBase {
                 if (matrixAttribute == null) {
                     throw new MatrixAttributeNotFoundException(dataVo.getMatrixUuid(), keywordColumn);
                 }
-                List<MatrixFilterVo> filterList = new ArrayList<>();
+                List<MatrixFilterVo> filterList = dataVo.getFilterList();
                 filterList.add(new MatrixFilterVo(keywordColumn, Expression.LIKE.getExpression(), Arrays.asList(keyword)));
                 dataVo.setFilterList(filterList);
             }
