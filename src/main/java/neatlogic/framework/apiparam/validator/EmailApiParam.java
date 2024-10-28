@@ -30,7 +30,7 @@ public class EmailApiParam extends ApiParamValidatorBase {
 
     @Override
     public boolean validate(Object param, String rule) {
-        Pattern pattern = Pattern.compile("^[A-Za-z0-9]+([_\\.][A-Za-z0-9]+)*@([A-Za-z0-9\\-]+\\.)+[A-Za-z]{2,6}$");
+        Pattern pattern = Pattern.compile("^[A-Za-z0-9]+([_\\.\\-][A-Za-z0-9]+)*@([A-Za-z0-9\\-]+\\.)+[A-Za-z]{2,6}$");
         return pattern.matcher(param.toString()).matches();
     }
 
