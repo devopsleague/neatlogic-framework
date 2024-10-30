@@ -15,6 +15,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.framework.restful.dispatch.handler;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONReader;
 import com.alibaba.fastjson.serializer.SerializeConfig;
@@ -615,7 +616,7 @@ public class ApiDispatcher {
         JSONObject paramObj;
         if (StringUtils.isNotBlank(jsonStr)) {
             try {
-                paramObj = JSONObject.parseObject(jsonStr);
+                paramObj = JSON.parseObject(jsonStr);
             } catch (Exception e) {
                 throw new ParamJSONIrregularException();
             }
