@@ -71,7 +71,9 @@ public class UserSelectHandler extends FormHandlerBase {
         }
         if (source instanceof String) {
             String sourceStr = (String) source;
-            if (sourceStr.startsWith("[") && sourceStr.endsWith("]")) {
+            if (StringUtils.isBlank(sourceStr)) {
+                return null;
+            } else if (sourceStr.startsWith("[") && sourceStr.endsWith("]")) {
                 try {
                     return JSONObject.parseArray((String) source);
                 } catch (Exception e) {
