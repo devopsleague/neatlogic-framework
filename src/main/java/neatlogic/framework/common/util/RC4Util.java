@@ -32,6 +32,21 @@ public class RC4Util {
         return plaintext;
     }
 
+    public static String toggle(String ciphertext) {
+        if (ciphertext.startsWith(PRE)) {
+            ciphertext = ciphertext.substring(5);
+            return new String(decrypt(KEY.getBytes(), hexStr2Bytes(ciphertext)));
+        } else if (ciphertext.startsWith(PRE_OLD)) {
+            ciphertext = ciphertext.substring(4);
+            return new String(decrypt(KEY.getBytes(), hexStr2Bytes(ciphertext)));
+        } else if (ciphertext.startsWith(PRE_TAGENT)) {
+            ciphertext = ciphertext.substring(11);
+            return new String(decrypt(KEY.getBytes(), hexStr2Bytes(ciphertext)));
+        } else {
+            return encrypt(ciphertext);
+        }
+    }
+
     public static String decrypt(String ciphertext) {
         if (ciphertext.startsWith(PRE)) {
             ciphertext = ciphertext.substring(5);

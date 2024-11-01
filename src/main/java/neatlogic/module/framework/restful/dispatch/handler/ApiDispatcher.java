@@ -53,9 +53,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.AntPathMatcher;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.HandlerMapping;
 
 import javax.annotation.Resource;
@@ -171,9 +172,9 @@ public class ApiDispatcher {
                             }
                         } else {
                             if (restComponent.disableReturnCircularReferenceDetect()) {
-                                returnObj.putAll(JSONObject.parseObject(JSONObject.toJSONString(returnV, SerializerFeature.DisableCircularReferenceDetect)));
+                                returnObj.putAll(JSON.parseObject(JSON.toJSONString(returnV, SerializerFeature.DisableCircularReferenceDetect)));
                             } else {
-                                returnObj.putAll(JSONObject.parseObject(JSONObject.toJSONString(returnV)));
+                                returnObj.putAll(JSON.parseObject(JSON.toJSONString(returnV)));
                             }
                         }
                     } else {
@@ -200,7 +201,7 @@ public class ApiDispatcher {
                                 returnObj.put("_disableDetect", true);
                             }
                         } else {
-                            returnObj.putAll(JSONObject.parseObject(JSONObject.toJSONString(returnV)));
+                            returnObj.putAll(JSON.parseObject(JSON.toJSONString(returnV)));
                         }
                     } else {
                         returnObj.putAll(restComponent.help());
@@ -226,7 +227,7 @@ public class ApiDispatcher {
                                 returnObj.put("_disableDetect", true);
                             }
                         } else {
-                            returnObj.putAll(JSONObject.parseObject(JSONObject.toJSONString(returnV)));
+                            returnObj.putAll(JSON.parseObject(JSON.toJSONString(returnV)));
                         }
                     } else {
                         returnObj.putAll(restComponent.help());
@@ -253,9 +254,9 @@ public class ApiDispatcher {
                             }
                         } else {
                             if (restComponent.disableReturnCircularReferenceDetect()) {
-                                returnObj.putAll(JSONObject.parseObject(JSONObject.toJSONString(returnV, SerializerFeature.DisableCircularReferenceDetect)));
+                                returnObj.putAll(JSON.parseObject(JSON.toJSONString(returnV, SerializerFeature.DisableCircularReferenceDetect)));
                             } else {
-                                returnObj.putAll(JSONObject.parseObject(JSONObject.toJSONString(returnV)));
+                                returnObj.putAll(JSON.parseObject(JSON.toJSONString(returnV)));
                             }
                         }
                     } else {
@@ -268,7 +269,7 @@ public class ApiDispatcher {
         }
     }
 
-    @RequestMapping(value = "/rest/**", method = RequestMethod.GET)
+    @GetMapping(value = "/rest/**")
     public void dispatcherForGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String pattern = (String) request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
         String token = new AntPathMatcher().extractPathWithinPattern(pattern, request.getServletPath());
@@ -327,7 +328,7 @@ public class ApiDispatcher {
         }
     }
 
-    @RequestMapping(value = "/raw/**", method = RequestMethod.POST)
+    @PostMapping(value = "/raw/**")
     public void dispatcherForRawPost(@RequestBody String jsonStr, HttpServletRequest request, HttpServletResponse response) throws Exception {
         String pattern = (String) request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
         String token = new AntPathMatcher().extractPathWithinPattern(pattern, request.getServletPath());
@@ -394,7 +395,7 @@ public class ApiDispatcher {
 
     }
 
-    @RequestMapping(value = "/rest/**", method = RequestMethod.POST)
+    @PostMapping(value = "/rest/**")
     public void dispatcherForPost(@RequestBody String jsonStr, HttpServletRequest request, HttpServletResponse response) throws Exception {
         String pattern = (String) request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
         String token = new AntPathMatcher().extractPathWithinPattern(pattern, request.getServletPath());
@@ -403,7 +404,7 @@ public class ApiDispatcher {
             JSONObject paramObj;
             if (StringUtils.isNotBlank(jsonStr)) {
                 try {
-                    paramObj = JSONObject.parseObject(jsonStr);
+                    paramObj = JSON.parseObject(jsonStr);
                 } catch (Exception e) {
                     throw new ParamJSONIrregularException();
                 }
@@ -477,7 +478,7 @@ public class ApiDispatcher {
 
     }
 
-    @RequestMapping(value = "/stream/**", method = RequestMethod.POST)
+    @PostMapping(value = "/stream/**")
     public void dispatcherForPostStream(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String pattern = (String) request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
         String token = new AntPathMatcher().extractPathWithinPattern(pattern, request.getServletPath());
@@ -541,7 +542,7 @@ public class ApiDispatcher {
         }
     }
 
-    @RequestMapping(value = "/binary/**", method = RequestMethod.GET)
+    @GetMapping(value = "/binary/**")
     public void dispatcherForPostBinary(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String pattern = (String) request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
         String token = new AntPathMatcher().extractPathWithinPattern(pattern, request.getServletPath());
@@ -609,7 +610,7 @@ public class ApiDispatcher {
         }
     }
 
-    @RequestMapping(value = "/binary/**", method = RequestMethod.POST, consumes = "application/json")
+    @PostMapping(value = "/binary/**", consumes = "application/json")
     public void dispatcherForPostBinaryJson(@RequestBody String jsonStr, HttpServletRequest request, HttpServletResponse response) throws IOException {
         String pattern = (String) request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
         String token = new AntPathMatcher().extractPathWithinPattern(pattern, request.getServletPath());
@@ -686,7 +687,7 @@ public class ApiDispatcher {
         }
     }
 
-    @RequestMapping(value = "/binary/**", method = RequestMethod.POST, consumes = "multipart/form-data")
+    @PostMapping(value = "/binary/**", consumes = "multipart/form-data")
     public void dispatcherForPostBinaryMultipart(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String pattern = (String) request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
         String token = new AntPathMatcher().extractPathWithinPattern(pattern, request.getServletPath());
@@ -746,7 +747,7 @@ public class ApiDispatcher {
         }
     }
 
-    @RequestMapping(value = "/help/rest/**", method = RequestMethod.GET)
+    @GetMapping(value = "/help/rest/**")
     public void resthelp(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String pattern = (String) request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
         String token = new AntPathMatcher().extractPathWithinPattern(pattern, request.getServletPath());
@@ -780,7 +781,7 @@ public class ApiDispatcher {
         response.getWriter().print(returnObj.toJSONString());
     }
 
-    @RequestMapping(value = "/help/raw/**", method = RequestMethod.GET)
+    @GetMapping(value = "/help/raw/**")
     public void rawhelp(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String pattern = (String) request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
         String token = new AntPathMatcher().extractPathWithinPattern(pattern, request.getServletPath());
@@ -815,7 +816,7 @@ public class ApiDispatcher {
     }
 
 
-    @RequestMapping(value = "/help/stream/**", method = RequestMethod.GET)
+    @GetMapping(value = "/help/stream/**")
     public void streamhelp(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String pattern = (String) request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
         String token = new AntPathMatcher().extractPathWithinPattern(pattern, request.getServletPath());
@@ -849,7 +850,7 @@ public class ApiDispatcher {
         response.getWriter().print(returnObj.toJSONString());
     }
 
-    @RequestMapping(value = "/help/binary/**", method = RequestMethod.GET)
+    @GetMapping(value = "/help/binary/**")
     public void binaryhelp(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String pattern = (String) request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
         String token = new AntPathMatcher().extractPathWithinPattern(pattern, request.getServletPath());
