@@ -191,7 +191,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.-->
 
     <select id="searchRunnerGroupCount" resultType="int" parameterType="neatlogic.framework.dto.runner.RunnerGroupVo"
             useCache="false">
-        select count(rg.id)
+        select count(DISTINCT rg.id)
         from runnergroup rg
         LEFT JOIN runnergroup_runner rgr ON rg.`id` = rgr.`runnergroup_id`
         LEFT JOIN runner r ON r.`id` = rgr.`runner_id`
