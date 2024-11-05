@@ -23,6 +23,7 @@ import neatlogic.framework.dto.AuthenticationInfoVo;
 import neatlogic.framework.dto.JwtVo;
 import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.exception.user.NoUserException;
+import neatlogic.framework.filter.core.LoginAuthHandlerBase;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -102,7 +103,15 @@ public class UserContext implements Serializable {
         context.setUserUuid(userVo.getUuid());
         context.setUserName(userVo.getUserName());
         context.setTenant(userVo.getTenant());
-        context.setToken(StringUtils.isBlank(userVo.getAuthorization()) ? userVo.getCookieAuthorization() : userVo.getAuthorization());
+        String token = StringUtils.isBlank(userVo.getAuthorization()) ? userVo.getCookieAuthorization() : userVo.getAuthorization();
+        if (StringUtils.isBlank(token)) {
+            try {
+                token = "GZIP_" + LoginAuthHandlerBase.buildJwt(userVo).getCc();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        context.setToken(token);
         context.setIsSuperAdmin(userVo.getIsSuperAdmin());
         context.setRequest(request);
         context.setResponse(response);
