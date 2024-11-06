@@ -118,10 +118,9 @@ public interface IFormAttributeDataConversionHandler {
      * 密码加密
      * @param source 属性原始数据
      * @param configObj 属性配置信息
-     * @param oldSource 旧数据
      * @return 返回加密后的数据
      */
-    default Object passwordEncryption(Object source, JSONObject configObj, Object oldSource) {
+    default Object passwordEncryption(Object source, JSONObject configObj) {// , Object oldSource
         return source;
     }
 
@@ -150,7 +149,7 @@ public interface IFormAttributeDataConversionHandler {
      * 掩藏密码
      * @return
      */
-    default Object passwordMask(Object source, JSONObject configObj) {
-        return source;
-    }
+//    default Object passwordMask(Object source, JSONObject configObj) {
+//        return source;
+//    }
 }

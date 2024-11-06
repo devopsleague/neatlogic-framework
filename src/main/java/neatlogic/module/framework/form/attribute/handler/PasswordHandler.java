@@ -26,12 +26,10 @@ import neatlogic.framework.form.exception.AttributeValidException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import java.util.Objects;
-
 @Component
 public class PasswordHandler extends FormHandlerBase {
 
-    public final static String PASSWORD_MASK_SYMBOL = "******";
+//    public final static String PASSWORD_MASK_SYMBOL = "******";
 
     @Override
     public String getHandler() {
@@ -157,16 +155,16 @@ public class PasswordHandler extends FormHandlerBase {
     }
 
     @Override
-    public Object passwordEncryption(Object source, JSONObject configObj, Object oldSource) {
+    public Object passwordEncryption(Object source, JSONObject configObj) {// , Object oldSource
         if (source == null) {
             return null;
         }
         if (source instanceof String) {
-            if (Objects.equals(source, PASSWORD_MASK_SYMBOL)) {
-                if (oldSource != null) {
-                    return oldSource;
-                }
-            }
+//            if (Objects.equals(source, PASSWORD_MASK_SYMBOL)) {
+//                if (oldSource != null) {
+//                    return oldSource;
+//                }
+//            }
             return RC4Util.encrypt((String) source);
         }
         return source;
@@ -196,11 +194,11 @@ public class PasswordHandler extends FormHandlerBase {
         return resultObj;
     }
 
-    @Override
-    public Object passwordMask(Object source, JSONObject configObj) {
-        if (source == null) {
-            return null;
-        }
-        return PASSWORD_MASK_SYMBOL;
-    }
+//    @Override
+//    public Object passwordMask(Object source, JSONObject configObj) {
+//        if (source == null) {
+//            return null;
+//        }
+//        return PASSWORD_MASK_SYMBOL;
+//    }
 }
