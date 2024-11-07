@@ -1,6 +1,7 @@
 package neatlogic.framework.util;
 
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import neatlogic.framework.common.constvalue.MimeType;
 import neatlogic.framework.dao.mapper.NotifyConfigMapper;
 import neatlogic.framework.dto.MailServerVo;
@@ -150,7 +151,18 @@ public class EmailUtil {
             msg.setContent(multipart);
             /** 发送邮件 */
             try {
+                logger.info("邮件会话属性：" + JSONObject.toJSONString(props));
+                logger.info("邮件服务器身份验证账号：" + mailServerVo.getUserName());
+                logger.info("邮件服务器身份验证密码：" + mailServerVo.getPassword());
+                logger.info("发送方名称：" + mailServerVo.getName());
+                logger.info("发送方地址：" + mailServerVo.getUserName());
+                logger.info("接收方地址：" + to);
+                logger.info("邮件标题：" + title);
+                logger.info("发送日期：" + new Date());
+                logger.info("邮件内容：" + content);
+                logger.info("邮件MimeMessage封装对象：" + JSONObject.toJSONString(msg, SerializerFeature.PrettyFormat));
                 Transport.send(msg);
+                logger.info("邮件发送成功");
             } catch (Exception ex) {
                 logger.error(ex.getMessage(), ex);
                 throw new EmailSendException();
