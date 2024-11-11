@@ -15,13 +15,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.framework.dto.condition;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.annotation.JSONField;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -31,7 +30,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ConditionGroupVo implements Serializable {
-    private static final Logger logger = LoggerFactory.getLogger(ConditionGroupVo.class);
+    //private static final Logger logger = LoggerFactory.getLogger(ConditionGroupVo.class);
     private static final long serialVersionUID = 8392325201425982471L;
 
     private String uuid;
@@ -52,7 +51,7 @@ public class ConditionGroupVo implements Serializable {
         if (CollectionUtils.isNotEmpty(conditionArray)) {
             JSONArray channelArray = jsonObj.getJSONArray("channelUuidList");
             if (CollectionUtils.isNotEmpty(channelArray)) {
-                channelUuidList = JSONObject.parseArray(channelArray.toJSONString(), String.class);
+                channelUuidList = JSON.parseArray(channelArray.toJSONString(), String.class);
             }
             conditionList = new ArrayList<>();
             conditionMap = new HashMap<>();

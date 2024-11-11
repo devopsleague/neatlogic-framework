@@ -144,7 +144,6 @@ public class JavascriptUtil {
             }
         }
         String script = "function run(){\n" + "return " + expression + ";\n" + "}\n";
-
         script += "function calculate(expression, dataValue, conditionValue, label){\n";
         script += "var calculateClass = Java.type('neatlogic.framework.util.javascript.expressionHandler.'+ expression); \n";
         script += "var result = calculateClass.calculate(dataValue, conditionValue, label);\n";

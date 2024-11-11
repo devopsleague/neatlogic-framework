@@ -28,7 +28,6 @@ import java.util.List;
 
 public class like {
     private static final Logger logger = LoggerFactory.getLogger(like.class);
-
     public static boolean calculate(JSONArray dataValueList, JSONArray conditionValueList, String label) {
         String prefix = (StringUtils.isNotBlank(label) ? label + "的" : "");
         List<ApiRuntimeException> errorList = JavascriptUtil.getErrorList();
