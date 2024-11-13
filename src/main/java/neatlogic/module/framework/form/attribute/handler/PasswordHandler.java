@@ -67,7 +67,7 @@ public class PasswordHandler extends FormHandlerBase {
         if (dataObj != null) {
             String data = (String) dataObj;
             if (StringUtils.isNotBlank(data)) {
-                return StringUtils.repeat("*", data.length());
+                return StringUtils.repeat("*", 8);
             }
         }
         return dataObj;
@@ -165,7 +165,9 @@ public class PasswordHandler extends FormHandlerBase {
 //                    return oldSource;
 //                }
 //            }
-            return RC4Util.encrypt((String) source);
+            if (StringUtils.isNotBlank((String) source)) {
+                return RC4Util.encrypt((String) source);
+            }
         }
         return source;
     }

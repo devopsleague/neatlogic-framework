@@ -650,6 +650,8 @@ public class TableInputerHandler extends FormHandlerBase {
         needParseHandlerList.add(FormHandler.FORMSELECT.getHandler());
         needParseHandlerList.add(FormHandler.FORMRADIO.getHandler());
         needParseHandlerList.add(FormHandler.FORMCHECKBOX.getHandler());
+        needParseHandlerList.add(FormHandler.FORMPASSWORD.getHandler());
+        needParseHandlerList.add(FormHandler.FORMUPLOAD.getHandler());
 
         JSONArray tbodyList = new JSONArray();
         for (int i = 0; i < dataArray.size(); i++) {
@@ -657,6 +659,10 @@ public class TableInputerHandler extends FormHandlerBase {
             JSONObject rowDataObj = dataArray.getJSONObject(i);
             for (Map.Entry<String, Object> cellDataObj : rowDataObj.entrySet()) {
                 String key = cellDataObj.getKey();
+                newRowDataObj.put(key, "");
+                if (cellDataObj.getValue() == null) {
+                    continue;
+                }
                 String handler = attributeHandlerMap.get(key);
                 if (noNeedParseHandlerList.contains(handler)) {
                     newRowDataObj.put(key, cellDataObj.getValue());
@@ -668,8 +674,6 @@ public class TableInputerHandler extends FormHandlerBase {
                         attributeDataVo.setDataObj(cellDataObj.getValue());
                         Object result = formAttributeDataConversionHandler.dataTransformationForEmail(attributeDataVo, config);
                         newRowDataObj.put(key, result);
-                    } else {
-                        newRowDataObj.put(key, "");
                     }
                 } else if (Objects.equals("formtable", handler)) {
                     JSONObject config = attributeConfigMap.get(key);
