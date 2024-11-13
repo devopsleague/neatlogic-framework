@@ -81,7 +81,7 @@ public class JavascriptUtil {
         return factory.getScriptEngine(classFilter);
     }
 
-    private static CompiledScript getCompiledScript(String script, boolean needCache) throws ScriptException {
+    public static CompiledScript getCompiledScript(String script, boolean needCache) throws ScriptException {
         CacheItem item = null;
         if (needCache) {
             List<CacheItem> engineList = engineCache.get();
