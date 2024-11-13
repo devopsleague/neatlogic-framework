@@ -455,6 +455,7 @@ public class ExternalDataSourceHandler extends MatrixDataSourceHandlerBase {
             for (MatrixAttributeVo matrixAttributeVo : attributeList) {
                 if (Objects.equals(matrixAttributeVo.getPrimaryKey(), 1)) {
                     uuidColumn = matrixAttributeVo.getUuid();
+                    break;
                 }
             }
             for (int i = 0; i < tbodyList.size(); i++) {
