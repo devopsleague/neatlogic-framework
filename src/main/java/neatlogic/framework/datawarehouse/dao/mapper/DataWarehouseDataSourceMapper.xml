@@ -101,7 +101,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.-->
                a.cron_expression as cronExpression,
                a.is_active       as isActive,
                a.status          as status,
-               a.module_id as moduleId,
+               a.module_id       as moduleId,
                a.data_count      as dataCount,
                a.db_type         as dbType,
                b.id              as fieldId,

@@ -19,8 +19,6 @@ import neatlogic.framework.datawarehouse.core.DataSourceServiceHandlerBase;
 import neatlogic.framework.datawarehouse.dao.mapper.DataWarehouseConnectionMapper;
 import neatlogic.framework.datawarehouse.dao.mapper.DataWarehouseDataSourceMapper;
 import neatlogic.framework.datawarehouse.dto.*;
-import neatlogic.framework.datawarehouse.enums.DatabaseVersion;
-import neatlogic.framework.datawarehouse.exceptions.DatabaseVersionNotFoundException;
 import neatlogic.framework.datawarehouse.exceptions.ReportDataSourceSyncException;
 import neatlogic.framework.datawarehouse.service.DataSourceService;
 import org.apache.commons.collections4.CollectionUtils;
@@ -33,7 +31,10 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import javax.sql.DataSource;
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class MysqlDataSourceHandler extends DataSourceServiceHandlerBase {
@@ -168,7 +169,7 @@ public class MysqlDataSourceHandler extends DataSourceServiceHandlerBase {
     }
 
     private Connection getConnection(DataSourceVo reportDataSourceVo) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
-        if (reportDataSourceVo.getConnectionId() != null) {
+        /*if (reportDataSourceVo.getConnectionId() != null) {
             ConnectionVo connectionVo = reportConnectionMapper.getConnectionById(reportDataSourceVo.getConnectionId());
             if (connectionVo != null) {
                 DatabaseVersion version = DatabaseVersion.getVersion(connectionVo.getDatabaseVersion());
@@ -186,7 +187,7 @@ public class MysqlDataSourceHandler extends DataSourceServiceHandlerBase {
                 }
                 return driver.connect(connectionVo.getUrl(), props);
             }
-        }
+        }*/
         //什么都没则返回默认连接
         return dataSource.getConnection();
     }
