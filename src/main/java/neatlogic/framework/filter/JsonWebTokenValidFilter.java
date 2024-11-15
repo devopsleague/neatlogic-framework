@@ -127,14 +127,8 @@ public class JsonWebTokenValidFilter extends OncePerRequestFilter {
                         userVo = loginAuth.auth(cachedRequest, response);
                         if (userVo != null && StringUtils.isNotBlank(userVo.getUuid())) {
                             logger.debug("======= getUser succeed: " + userVo.getUuid());
-                            isExpired = userExpirationValid(userVo, timezone, request, response);
-                            if (!isExpired) {
-                                for (ILoginPostProcessor loginPostProcessor : LoginPostProcessorFactory.getLoginPostProcessorSet()) {
-                                    loginPostProcessor.loginAfterInitialization();
-                                }
-                            } else {
-                                returnErrorResponseJson(ResponseCode.LOGIN_EXPIRED, response, loginAuth.directUrl());
-                                return;
+                            for (ILoginPostProcessor loginPostProcessor : LoginPostProcessorFactory.getLoginPostProcessorSet()) {
+                                loginPostProcessor.loginAfterInitialization();
                             }
                         } else {
                             returnErrorResponseJson(ResponseCode.AUTH_FAILED, response, loginAuth.directUrl(), loginAuth.getType());

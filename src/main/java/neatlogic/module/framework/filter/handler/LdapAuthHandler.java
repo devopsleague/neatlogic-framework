@@ -115,10 +115,4 @@ public class LdapAuthHandler extends LoginAuthHandlerBase {
     public boolean isNeedAuth(){
         return false;
     }
-
-
-    @Override
-    public boolean isValidTokenCreateTime() {
-        return true;
-    }
 }
