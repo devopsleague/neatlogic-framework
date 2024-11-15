@@ -49,7 +49,7 @@ public class NeatLogicUniqueBlockingQueue<T> {
             return added;
         } else {
             if (t != null) {
-                logger.info("NeatLogicUniqueBlockingQueue repeat： {}", JSON.toJSONString(t));
+                logger.debug("NeatLogicUniqueBlockingQueue repeat： {}", JSON.toJSONString(t));
             }
         }
         return false; // 已存在任务，直接返回 false

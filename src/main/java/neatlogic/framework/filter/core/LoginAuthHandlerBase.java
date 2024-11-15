@@ -107,12 +107,13 @@ public abstract class LoginAuthHandlerBase implements ILoginAuthHandler {
         }
         //通过第三方认证接口认证。第一次认证通过后需构建并设置response 认证 cookie
         if (userVo != null && !Objects.equals(getType(), "default")) {
-            logger.debug("======= myAuth: {}} ===== {}", getType(), userVo.getUserId());
+            logger.debug("======= myAuth: {} ===== {}", getType(), userVo.getUserId());
             JwtVo jwtVo = new JwtVo();
             AuthenticationInfoVo authenticationInfoVo = null;
             jwtVo.setToken(getToken(userVo));
             Object authenticationInfo = UserSessionCache.getItem(jwtVo.getTokenHash());
             if (!UserSessionCache.containsKey(jwtVo.getTokenHash())) {
+                logger.debug("======= tokenHash: {}", jwtVo.getTokenHash());
                 String authInfoHash = null;
                 String authenticationInfoStr = null;
                 authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userVo.getUuid());
@@ -125,7 +126,6 @@ public abstract class LoginAuthHandlerBase implements ILoginAuthHandler {
                         authInfoHash = Md5Util.encryptMD5(authenticationInfoStr);
                     }
                 }
-                System.out.println(1);
                 UserSessionVo userSessionVo = new UserSessionVo(userVo.getUuid(), jwtVo.getToken(), jwtVo.getTokenHash(), jwtVo.getTokenCreateTime(), authInfoHash, authenticationInfoStr);
                 InsertUserSessionThread.addInsertUserSession(userSessionVo);
                 UserSessionCache.addItem(jwtVo.getTokenHash(), authenticationInfoStr);
