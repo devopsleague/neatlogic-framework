@@ -23,11 +23,9 @@ import neatlogic.framework.common.constvalue.DeviceType;
 import neatlogic.framework.common.util.CommonUtil;
 import neatlogic.framework.dao.cache.UserSessionCache;
 import neatlogic.framework.dao.mapper.*;
-import neatlogic.framework.dto.AuthenticationInfoVo;
-import neatlogic.framework.dto.JwtVo;
-import neatlogic.framework.dto.UserSessionContentVo;
-import neatlogic.framework.dto.UserVo;
+import neatlogic.framework.dto.*;
 import neatlogic.framework.dto.captcha.LoginFailedCountVo;
+import neatlogic.framework.filter.InsertUserSessionThread;
 import neatlogic.framework.service.AuthenticationInfoService;
 import neatlogic.framework.util.Md5Util;
 import org.apache.commons.collections4.CollectionUtils;
@@ -103,37 +101,41 @@ public abstract class LoginAuthHandlerBase implements ILoginAuthHandler {
         //如果userVo没有uuid则这个user不合法，直接置null
         if (userVo != null && StringUtils.isBlank(userVo.getUuid())) {
             if (!Objects.equals(getType(), "default")) {
-                logger.error(getType() + " return userVo invalid!! userVo must include uuid");
+                logger.error("{} return userVo invalid!! userVo must include uuid", getType());
             }
             userVo = null;
         }
-        //如果认证cookie为null,说明不是通过登录页登录，而是通过第三方认证接口认证。第一次认证通过后需构建并设置response 认证 cookie
-        if (userVo != null && StringUtils.isBlank(userVo.getCookieAuthorization())) {
-            logger.debug("======= myAuth: " + getType() + " ===== " + userVo.getUserId());
-            AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userVo.getUuid());
-            JwtVo jwtVo = buildJwt(userVo, authenticationInfoVo);
-            setResponseAuthCookie(response, request, tenant, jwtVo);
-            String authenticationInfoStr = null;
-            String authInfoHash = null;
-            if (authenticationInfoVo != null && (CollectionUtils.isNotEmpty(authenticationInfoVo.getUserUuidList()) || CollectionUtils.isNotEmpty(authenticationInfoVo.getTeamUuidList()) || CollectionUtils.isNotEmpty(authenticationInfoVo.getRoleUuidList()))) {
-                authenticationInfoVo.setHeaderSet(null);
-                authenticationInfoStr = JSON.toJSONString(authenticationInfoVo);
-                if (StringUtils.isNotBlank(authenticationInfoStr)) {
-                    authInfoHash = Md5Util.encryptMD5(authenticationInfoStr);
+        //通过第三方认证接口认证。第一次认证通过后需构建并设置response 认证 cookie
+        if (userVo != null && !Objects.equals(getType(), "default")) {
+            logger.debug("======= myAuth: {}} ===== {}", getType(), userVo.getUserId());
+            JwtVo jwtVo = new JwtVo();
+            AuthenticationInfoVo authenticationInfoVo = null;
+            jwtVo.setToken(getToken(userVo));
+            Object authenticationInfo = UserSessionCache.getItem(jwtVo.getTokenHash());
+            if (!UserSessionCache.containsKey(jwtVo.getTokenHash())) {
+                String authInfoHash = null;
+                String authenticationInfoStr = null;
+                authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userVo.getUuid());
+                jwtVo = buildJwt(userVo, authenticationInfoVo);
+                setResponseAuthCookie(response, request, tenant, jwtVo);
+                if (authenticationInfoVo != null && (CollectionUtils.isNotEmpty(authenticationInfoVo.getUserUuidList()) || CollectionUtils.isNotEmpty(authenticationInfoVo.getTeamUuidList()) || CollectionUtils.isNotEmpty(authenticationInfoVo.getRoleUuidList()))) {
+                    authenticationInfoVo.setHeaderSet(null);
+                    authenticationInfoStr = JSON.toJSONString(authenticationInfoVo);
+                    if (StringUtils.isNotBlank(authenticationInfoStr)) {
+                        authInfoHash = Md5Util.encryptMD5(authenticationInfoStr);
+                    }
                 }
-            }
-            if (isValidTokenCreateTime()) {
-                userSessionMapper.insertUserSession(userVo.getUuid(), jwtVo.getTokenHash(), jwtVo.getTokenCreateTime(), authInfoHash);
-                userSessionContentMapper.insertUserSessionContent(new UserSessionContentVo(jwtVo.getTokenHash(), jwtVo.getToken()));
-                if(StringUtils.isNotBlank(authInfoHash)) {
-                    userSessionContentMapper.insertUserSessionContent(new UserSessionContentVo(authInfoHash, authenticationInfoStr));
-                }
+                System.out.println(1);
+                UserSessionVo userSessionVo = new UserSessionVo(userVo.getUuid(), jwtVo.getToken(), jwtVo.getTokenHash(), jwtVo.getTokenCreateTime(), authInfoHash, authenticationInfoStr);
+                InsertUserSessionThread.addInsertUserSession(userSessionVo);
+                UserSessionCache.addItem(jwtVo.getTokenHash(), authenticationInfoStr);
+
             } else {
-                jwtVo.setValidTokenCreateTime(isValidTokenCreateTime());
-                if (UserSessionCache.getItem(jwtVo.getTokenHash()) == null) {
-                    userSessionMapper.insertUserSessionWithoutTokenCreateTime(userVo.getUuid(), jwtVo.getTokenHash(), jwtVo.getTokenCreateTime(), authInfoHash);
+                if(authenticationInfo != null) {
+                    authenticationInfoVo = JSON.toJavaObject(JSON.parseObject(authenticationInfo.toString()), AuthenticationInfoVo.class);
                 }
             }
+            UserContext.init(userVo, authenticationInfoVo, "+8:00", request, response);
             userVo.setJwtVo(jwtVo);
         }
         return userVo;
@@ -173,6 +175,12 @@ public abstract class LoginAuthHandlerBase implements ILoginAuthHandler {
         jwtVo.setJwtsign(jwtsign);
         checkUserVo.setJwtVo(jwtVo);
         return jwtVo;
+    }
+
+    public static String getToken(UserVo checkUserVo) throws Exception {
+        Long tokenCreateTime = System.currentTimeMillis();
+        JwtVo jwtVo = new JwtVo(checkUserVo, tokenCreateTime, new AuthenticationInfoVo());
+        return jwtVo.getToken();
     }
 
     /**
@@ -290,8 +298,4 @@ public abstract class LoginAuthHandlerBase implements ILoginAuthHandler {
         return userMapper.getUserByUserIdAndPassword(userVo);
     }
 
-    @Override
-    public boolean isValidTokenCreateTime() {
-        return false;
-    }
 }

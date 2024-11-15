@@ -25,9 +25,6 @@ public class JwtVo implements Serializable {
     @EntityField(name = "创建时间", type = ApiParamType.STRING)
     private Long tokenCreateTime;
 
-    @EntityField(name = "是否校验tokenCreateTime", type = ApiParamType.STRING)
-    private boolean isValidTokenCreateTime = true;
-
     @EntityField(name = "token", type = ApiParamType.STRING)
     private String token;
 
@@ -147,12 +144,12 @@ public class JwtVo implements Serializable {
         return token;
     }
 
-    public void setValidTokenCreateTime(boolean validTokenCreateTime) {
-        isValidTokenCreateTime = validTokenCreateTime;
+    public void setToken(String token) {
+        this.token = token;
     }
 
     public boolean isNotValidTokenCreateTime() {
-        return Config.ENABLE_NO_SECRET() || !Config.ENABLE_VALID_TOKEN_FCD() || !isValidTokenCreateTime;
+        return Config.ENABLE_NO_SECRET() || !Config.ENABLE_VALID_TOKEN_FCD();
 
     }
 

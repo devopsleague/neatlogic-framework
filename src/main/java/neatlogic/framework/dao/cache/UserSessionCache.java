@@ -14,9 +14,9 @@ public class UserSessionCache {
             CacheConfiguration cacheConfiguration = new CacheConfiguration();
             cacheConfiguration.setName("UserSessionCache");
             cacheConfiguration.setMemoryStoreEvictionPolicy("LRU");
-            cacheConfiguration.setMaxEntriesLocalHeap(1000);
-            cacheConfiguration.internalSetTimeToIdle(300);
-            cacheConfiguration.internalSetTimeToLive(600);
+            cacheConfiguration.setMaxEntriesLocalHeap(2000);
+            cacheConfiguration.internalSetTimeToIdle(900);
+            cacheConfiguration.internalSetTimeToLive(900);
             Configuration config = new Configuration();
             config.addCache(cacheConfiguration);
             CACHE_MANAGER = CacheManager.newInstance(config);
@@ -41,5 +41,9 @@ public class UserSessionCache {
 
     public static void removeItem(String key) {
         getCache().remove(key);
+    }
+
+    public static boolean containsKey(String key){
+        return getCache().isKeyInCache(key);
     }
 }

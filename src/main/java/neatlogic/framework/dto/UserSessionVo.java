@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Objects;
 
 public class UserSessionVo implements Serializable {
     private String userUuid;
@@ -24,6 +25,9 @@ public class UserSessionVo implements Serializable {
     @EntityField(name = "token 哈希", type = ApiParamType.STRING)
     private String tokenHash;
 
+    @EntityField(name = "token", type = ApiParamType.STRING)
+    private String token;
+
     public UserSessionVo(String userUuid, Date sessionTime) {
         this.userUuid = userUuid;
         this.sessionTime = sessionTime;
@@ -31,6 +35,15 @@ public class UserSessionVo implements Serializable {
 
     public UserSessionVo() {
         super();
+    }
+
+    public UserSessionVo(String uuid, String token, String tokenHash, Long tokenCreateTime, String authInfoHash, String authInfoStr) {
+        this.userUuid = uuid;
+        this.token = token;
+        this.tokenHash = tokenHash;
+        this.tokenCreateTime = tokenCreateTime;
+        this.authInfoHash = authInfoHash;
+        this.authInfoStr = authInfoStr;
     }
 
     public String getUserUuid() {
@@ -53,7 +66,7 @@ public class UserSessionVo implements Serializable {
         if (authInfo == null) {
             if (StringUtils.isNotBlank(authInfoStr)) {
                 authInfo = JSONObject.toJavaObject(JSONObject.parseObject(authInfoStr), AuthenticationInfoVo.class);
-            }else{
+            } else {
                 authInfo = new AuthenticationInfoVo(userUuid);
             }
         }
@@ -90,5 +103,26 @@ public class UserSessionVo implements Serializable {
 
     public void setAuthInfoHash(String authInfoHash) {
         this.authInfoHash = authInfoHash;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(token);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UserSessionVo task = (UserSessionVo) o;
+        return Objects.equals(token, task.token) ;
     }
 }
