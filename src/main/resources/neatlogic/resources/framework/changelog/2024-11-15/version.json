@@ -1,0 +1,10 @@
+{
+  "content":[
+    {
+      "type":"功能修改",
+      "detail":[
+        {"msg":"1.调整user_session表引擎为innodb"}
+      ]
+    }
+  ]
+}

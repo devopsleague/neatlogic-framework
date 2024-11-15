@@ -54,7 +54,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.-->
         is_active AS isActive,
         error,
         config AS configStr,
-        server_id AS serverId
+        server_id AS serverId,
+        handler AS handler
         FROM mq_subscribe
         <include refid="searchSubscribeCondition"></include>
     </select>
@@ -70,7 +71,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.-->
                is_active  AS isActive,
                error,
                config     AS configStr,
-               server_id  AS serverId
+               server_id  AS serverId,
+               handler    AS handler
         FROM mq_subscribe
         WHERE name = #{value}
     </select>
@@ -86,7 +88,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.-->
                is_active  AS isActive,
                error,
                config     AS configStr,
-               server_id  AS serverId
+               server_id  AS serverId,
+               handler    AS handler
         FROM mq_subscribe
         WHERE id = #{value}
     </select>
@@ -102,7 +105,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.-->
          is_active,
          error,
          config,
-         server_id)
+         server_id,
+         handler)
         VALUES (#{id},
                 #{name},
                 #{className},
@@ -112,7 +116,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.-->
                 #{isActive},
                 #{error},
                 #{configStr},
-                #{serverId})
+                #{serverId},
+                #{handler})
     </insert>
 
     <update id="updateSubscribe" parameterType="neatlogic.framework.mq.dto.SubscribeVo">

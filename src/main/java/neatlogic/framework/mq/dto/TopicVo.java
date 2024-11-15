@@ -15,6 +15,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.framework.mq.dto;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.annotation.JSONField;
 import neatlogic.framework.common.constvalue.ApiParamType;
@@ -34,6 +35,8 @@ public class TopicVo {
     private JSONObject config;
     @JSONField(serialize = false)
     private String configStr;
+    @EntityField(name = "MQ类型", type = ApiParamType.STRING)
+    private String handler;
 
     public String getName() {
         return name;
@@ -67,10 +70,18 @@ public class TopicVo {
         this.isActive = isActive;
     }
 
+    public String getHandler() {
+        return handler;
+    }
+
+    public void setHandler(String handler) {
+        this.handler = handler;
+    }
+
     public JSONObject getConfig() {
         if (StringUtils.isNotBlank(configStr) && config == null) {
             try {
-                config = JSONObject.parseObject(configStr);
+                config = JSON.parseObject(configStr);
             } catch (Exception ignored) {
 
             }

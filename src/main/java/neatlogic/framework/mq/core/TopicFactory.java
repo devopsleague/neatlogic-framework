@@ -19,8 +19,10 @@ import neatlogic.framework.applicationlistener.core.ModuleInitializedListenerBas
 import neatlogic.framework.bootstrap.NeatLogicWebApplicationContext;
 import neatlogic.framework.common.RootComponent;
 import neatlogic.framework.mq.dto.TopicVo;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RootComponent
 public class TopicFactory extends ModuleInitializedListenerBase {
@@ -31,8 +33,16 @@ public class TopicFactory extends ModuleInitializedListenerBase {
         return componentMap.get(topicName);
     }
 
-    public static List<TopicVo> getTopicList() {
+    public static List<TopicVo> getTopicList(String handler) {
+        if (StringUtils.isNotBlank(handler)) {
+            return topicList.stream().filter(d -> d.getHandler().equals(handler)).collect(Collectors.toList());
+        }
         return topicList;
+    }
+
+    public static TopicVo getTopicByName(String topicName) {
+        Optional<TopicVo> op = topicList.stream().filter(t -> t.getName().equals(topicName)).findFirst();
+        return op.orElse(null);
     }
 
     @Override
@@ -46,6 +56,7 @@ public class TopicFactory extends ModuleInitializedListenerBase {
                 topicVo.setName(component.getName());
                 topicVo.setLabel(component.getLabel());
                 topicVo.setDescription(component.getDescription());
+                topicVo.setHandler(component.getHandler());
                 topicList.add(topicVo);
             }
         }

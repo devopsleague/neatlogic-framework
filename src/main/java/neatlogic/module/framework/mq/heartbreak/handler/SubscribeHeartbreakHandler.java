@@ -64,7 +64,7 @@ public class SubscribeHeartbreakHandler implements IHeartbreakHandler {
                             if (subscribeHandler == null) {
                                 throw new SubscribeHandlerNotFoundException(subVo.getClassName());
                             }
-                            SubscribeManager.create(subVo.getTopicName(), subVo.getName(), subVo.getIsDurable().equals(1), subscribeHandler);
+                            SubscribeManager.create(subVo, subscribeHandler);
                         } catch (Exception ex) {
                             subVo.setError(ex.getMessage());
                             mqSubscribeMapper.updateSubscribeError(subVo);

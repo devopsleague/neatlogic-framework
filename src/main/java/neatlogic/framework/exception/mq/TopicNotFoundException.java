@@ -13,16 +13,12 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
-package neatlogic.framework.mq.core;
+package neatlogic.framework.exception.mq;
 
-public interface ITopic<T> {
-    String getName();
+import neatlogic.framework.exception.core.ApiRuntimeException;
 
-    String getLabel();
-
-    String getDescription();
-
-    String getHandler();
-
-    void send(T content);
+public class TopicNotFoundException extends ApiRuntimeException {
+    public TopicNotFoundException(String name) {
+        super("找不到消息主题“{0}”", name);
+    }
 }

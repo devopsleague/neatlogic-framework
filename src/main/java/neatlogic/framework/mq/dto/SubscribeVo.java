@@ -20,8 +20,10 @@ import com.alibaba.fastjson.annotation.JSONField;
 import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.dto.BasePageVo;
+import neatlogic.framework.mq.core.TopicFactory;
 import neatlogic.framework.restful.annotation.EntityField;
 import neatlogic.framework.util.SnowflakeUtil;
+import org.apache.commons.lang3.StringUtils;
 
 public class SubscribeVo extends BasePageVo {
     @EntityField(name = "id", type = ApiParamType.LONG)
@@ -32,6 +34,8 @@ public class SubscribeVo extends BasePageVo {
     private String className;
     @EntityField(name = "主题唯一标识", type = ApiParamType.STRING)
     private String topicName;
+    @EntityField(name = "主题名称", type = ApiParamType.STRING)
+    private String topicLabel;
     @EntityField(name = "是否持久订阅", type = ApiParamType.INTEGER)
     private Integer isDurable;
     @EntityField(name = "描述", type = ApiParamType.STRING)
@@ -50,6 +54,8 @@ public class SubscribeVo extends BasePageVo {
     private String configStr;
     @JSONField(serialize = false)
     private Integer serverId;
+    @EntityField(name = "MQ类型", type = ApiParamType.STRING)
+    private String handler;
 
     public String getTopicName() {
         return topicName;
@@ -66,8 +72,19 @@ public class SubscribeVo extends BasePageVo {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+
+    public String getTopicLabel() {
+        if (StringUtils.isBlank(topicLabel) && StringUtils.isNotBlank(topicName)) {
+            TopicVo topicVo = TopicFactory.getTopicByName(topicName);
+            if (topicVo != null) {
+                topicLabel = topicVo.getLabel();
+            }
+        }
+        return topicLabel;
+    }
+
+    public void setTopicLabel(String topicLabel) {
+        this.topicLabel = topicLabel;
     }
 
     public Integer getServerId() {
@@ -75,6 +92,14 @@ public class SubscribeVo extends BasePageVo {
             serverId = Config.SCHEDULE_SERVER_ID;
         }
         return serverId;
+    }
+
+    public String getHandler() {
+        return handler;
+    }
+
+    public void setHandler(String handler) {
+        this.handler = handler;
     }
 
     public void setServerId(Integer serverId) {

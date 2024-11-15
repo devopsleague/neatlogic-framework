@@ -1,0 +1,10 @@
+{
+  "content":[
+    {
+      "type":"功能添加",
+      "detail":[
+        {"msg":"1.消息队列同时支持多种实现，例如artemis和kafka"}
+      ]
+    }
+  ]
+}

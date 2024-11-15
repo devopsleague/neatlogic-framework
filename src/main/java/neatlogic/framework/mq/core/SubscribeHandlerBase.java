@@ -43,8 +43,8 @@ public abstract class SubscribeHandlerBase implements ISubscribeHandler {
         if (subscribeVo != null && subscribeVo.getIsActive().equals(1) && subscribeVo.getServerId().equals(Config.SCHEDULE_SERVER_ID)) {
             //System.out.println(clientName);
             myOnMessage(m);
-        } else if (subscribeVo == null || subscribeVo.getIsActive().equals(0)) {
-            SubscribeManager.destroy(topicName, clientName);
+        } else if (subscribeVo != null && subscribeVo.getIsActive().equals(0)) {
+            SubscribeManager.destroy(subscribeVo);
         }
     }
 

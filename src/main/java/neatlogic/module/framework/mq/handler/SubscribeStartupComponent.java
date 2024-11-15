@@ -29,7 +29,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.jms.listener.SimpleMessageListenerContainer;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -41,7 +40,7 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 public class SubscribeStartupComponent extends StartupBase {
-    private final static Logger logger = LoggerFactory.getLogger(SubscribeStartupComponent.class);
+    private static final Logger logger = LoggerFactory.getLogger(SubscribeStartupComponent.class);
     @Resource
     private MqSubscribeMapper mqSubscribeMapper;
 
@@ -63,7 +62,7 @@ public class SubscribeStartupComponent extends StartupBase {
                         if (subscribeHandler == null) {
                             throw new SubscribeHandlerNotFoundException(subVo.getClassName());
                         }
-                        SubscribeManager.create(subVo.getTopicName(), subVo.getName(), subVo.getIsDurable().equals(1), subscribeHandler);
+                        SubscribeManager.create(subVo, subscribeHandler);
                         subVo.setError("");
                     } catch (Exception ex) {
                         subVo.setError(ex.getMessage());
@@ -86,8 +85,7 @@ public class SubscribeStartupComponent extends StartupBase {
         Runnable runnable = new NeatLogicThread("MQ-SUBSCRIBE-RECONNECT") {
             @Override
             protected void execute() {
-                try {
-                    Map<String, SimpleMessageListenerContainer> containerMap = SubscribeManager.getListenerMap();
+                    /*Map<String, SimpleMessageListenerContainer> containerMap = SubscribeManager.get();
                     if (MapUtils.isNotEmpty(containerMap)) {
                         for (String key : containerMap.keySet()) {
                             SimpleMessageListenerContainer container = containerMap.get(key);
@@ -101,9 +99,24 @@ public class SubscribeStartupComponent extends StartupBase {
                                 mqSubscribeMapper.updateSubscribeError(subVo);
                             }
                         }
+                    }*/
+                Map<String, List<SubscribeVo>> activeSubscribeMap = SubscribeManager.getActiveSubscribeMap();
+                if (MapUtils.isNotEmpty(activeSubscribeMap)) {
+                    for (Map.Entry<String, List<SubscribeVo>> entry : activeSubscribeMap.entrySet()) {
+                        //切换租户
+                        TenantContext.get().switchTenant(entry.getKey());
+                        List<SubscribeVo> activeSubscribeList = entry.getValue();
+                        for (SubscribeVo subVo : activeSubscribeList) {
+                            try {
+                                SubscribeManager.reconnect(subVo);
+                            } catch (Exception e) {
+                                logger.error(e.getMessage(), e);
+                                subVo.setError(e.getMessage());
+                                mqSubscribeMapper.updateSubscribeError(subVo);
+                            }
+
+                        }
                     }
-                } catch (Exception e) {
-                    logger.error("连接消息队列失败，异常：" + e.getMessage());
                 }
             }
         };
