@@ -91,6 +91,10 @@ public class NeatLogicUniqueBlockingQueue<T> {
         }
     }
 
+    public int size(){
+        return blockingQueue.size();
+    }
+
 //    public static void main(String[] args) throws InterruptedException {
 //        NeatLogicUniqueBlockingQueue<UserSessionVo> queue = new NeatLogicUniqueBlockingQueue<>(1);
 //

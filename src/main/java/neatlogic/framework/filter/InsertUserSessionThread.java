@@ -69,4 +69,8 @@ public class InsertUserSessionThread {
     public static void addInsertUserSession(UserSessionVo userSessionVo) {
         blockingQueue.offer(userSessionVo);
     }
+
+    public static int getSize(){
+        return blockingQueue.size();
+    }
 }
