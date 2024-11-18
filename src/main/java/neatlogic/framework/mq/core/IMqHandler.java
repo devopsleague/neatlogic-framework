@@ -20,12 +20,18 @@ package neatlogic.framework.mq.core;
 import neatlogic.framework.exception.mq.SubscribeTopicException;
 import neatlogic.framework.mq.dto.SubscribeVo;
 
+import java.util.concurrent.ExecutionException;
+
 public interface IMqHandler {
     String getName();
 
-    boolean create(SubscribeVo subVo, ISubscribeHandler subscribeHandler) throws SubscribeTopicException;
+    String getLabel();
 
-    void reconnect(SubscribeVo subscribeVo);
+    boolean create(SubscribeVo subVo) throws SubscribeTopicException, ExecutionException, InterruptedException;
+
+    void reconnect(SubscribeVo subscribeVo) throws SubscribeTopicException, ExecutionException, InterruptedException;
+
+    boolean isRunning(SubscribeVo subscribeVo);
 
     void destroy(SubscribeVo subscribeVo);
 

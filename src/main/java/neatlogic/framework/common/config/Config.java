@@ -81,6 +81,8 @@ public class Config {
 
     private static String JMS_URL;
 
+    private static String KAFKA_URL;
+
 
     private static String MOBILE_TEST_USER;//移动端测试用户
     private static Boolean MOBILE_IS_ONLINE;//是否启动移动端
@@ -195,7 +197,7 @@ public class Config {
             ENABLE_MAINTENANCE = false;
         }
 
-        System.setProperty("javax.xml.accessExternalDTD", "all" );//解决mapper引入classpath：dtd问题
+        System.setProperty("javax.xml.accessExternalDTD", "all");//解决mapper引入classpath：dtd问题
     }
 
     public static String NEATLOGIC_HOME() {
@@ -273,6 +275,10 @@ public class Config {
 
     public static String JMS_URL() {
         return JMS_URL;
+    }
+
+    public static String KAFKA_URL() {
+        return KAFKA_URL;
     }
 
     public static String FILE_HANDLER() {
@@ -453,9 +459,11 @@ public class Config {
     public static Integer SQLRUNNER_QUERY_TIMEOUT() {
         return SQLRUNNER_QUERY_TIMEOUT;
     }
+
     public static Integer LICENSE_WILL_EXPIRED_NOTIFY_DAY() {
         return LICENSE_WILL_EXPIRED_NOTIFY_DAY;
     }
+
     public static Properties properties = new Properties();
 
     private void initConfigFile() {
@@ -545,7 +553,7 @@ public class Config {
     private static void loadNacosProperties(String configInfo) {
         try {
             Properties prop = new Properties();
-           if (StringUtils.isNotBlank(configInfo)) {
+            if (StringUtils.isNotBlank(configInfo)) {
                 prop.load(new InputStreamReader(new ByteArrayInputStream(configInfo.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8));
                 System.out.println("⚡" + I18nUtils.getStaticMessage("common.startloadconfig", "Nacos"));
             } else {
@@ -581,6 +589,8 @@ public class Config {
             MONGO_DATABASE = prop.getProperty("mongo.database", "neatlogic");
 
             JMS_URL = prop.getProperty("jms.url", "tcp://localhost:61616");
+            KAFKA_URL = prop.getProperty("kafka.url", "localhost:9092");
+
             FILE_HANDLER = prop.getProperty("file.handler", "FILE");
 
             MOBILE_TEST_USER = prop.getProperty("mobile.test.user");

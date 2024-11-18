@@ -25,73 +25,23 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 @RootComponent
 public final class SubscribeManager {
-    //private static final Map<String, SimpleMessageListenerContainer> containerMap = new ConcurrentHashMap<>();
-    //private static ConnectionFactory connectionFactory;
-    //public static final String SEPARATOR = "#";
     private static final Map<String, List<SubscribeVo>> activeSubscribeMap = new HashMap<>();//记录所有激活的订阅，重连时直接从这里获取，避免反复查询数据库
 
     public static Map<String, List<SubscribeVo>> getActiveSubscribeMap() {
         return activeSubscribeMap;
     }
 
-    public static void reconnect(SubscribeVo subscribeVo) {
+    public static void reconnect(SubscribeVo subscribeVo) throws SubscribeTopicException, ExecutionException, InterruptedException {
         IMqHandler handler = MqHandlerFactory.getMqHandler(subscribeVo.getHandler());
         if (handler != null) {
             handler.reconnect(subscribeVo);
         }
     }
-    /*public static Map<String, SimpleMessageListenerContainer> getListenerMap() {
-        return containerMap;
-    }*/
 
-
-    /*@Autowired
-    public void setConnectionFactory(ActiveMQConnectionFactory _connectionFactory) {
-        connectionFactory = _connectionFactory;
-    }*/
-
-    /**
-     * 启动订阅主题
-     *
-     * @param topicName  主题名称
-     * @param clientName 订阅名称
-     * @return 是否成功
-     */
-    /*public static boolean start(String topicName, String clientName) {
-        topicName = topicName.toLowerCase(Locale.ROOT);
-        clientName = clientName.toLowerCase(Locale.ROOT);
-        if (containerMap.containsKey(TenantContext.get().getTenantUuid() + SEPARATOR + topicName + SEPARATOR + clientName)) {
-            SimpleMessageListenerContainer container = containerMap.get(TenantContext.get().getTenantUuid() + SEPARATOR + topicName + SEPARATOR + clientName);
-            if (!container.isRunning()) {
-                container.start();
-            }
-            return true;
-        }
-        return false;
-    }*/
-
-    /**
-     * 停止订阅主题
-     *
-     * @param topicName  主题名称
-     * @param clientName 订阅名称
-     * @return 是否成功
-     */
-    /*public static boolean stop(String topicName, String clientName) {
-        topicName = topicName.toLowerCase(Locale.ROOT);
-        clientName = clientName.toLowerCase(Locale.ROOT);
-        if (containerMap.containsKey(TenantContext.get().getTenantUuid() + SEPARATOR + topicName + SEPARATOR + clientName)) {
-            SimpleMessageListenerContainer container = containerMap.get(TenantContext.get().getTenantUuid() + SEPARATOR + topicName + SEPARATOR + clientName);
-            if (container.isRunning()) {
-                container.stop();
-            }
-            return true;
-        }
-        return false;
-    }*/
 
     /**
      * 删除订阅
@@ -106,56 +56,31 @@ public final class SubscribeManager {
         }
     }
 
+    public static boolean isRunning(SubscribeVo subVo) {
+        IMqHandler handler = MqHandlerFactory.getMqHandler(subVo.getHandler());
+        if (handler != null) {
+            return handler.isRunning(subVo);
+        }
+        return false;
+    }
+
     /**
      * 创建订阅
      *
      * @return 是否成功
      */
-    public static void create(SubscribeVo subVo, ISubscribeHandler subscribeHandler) throws SubscribeTopicException {
-        // topicName, String clientName, boolean isDurable, ISubscribeHandler subscribeHandler
+    public static void create(SubscribeVo subVo) throws SubscribeTopicException, ExecutionException, InterruptedException {
+
         IMqHandler handler = MqHandlerFactory.getMqHandler(subVo.getHandler());
         if (handler == null) {
             throw new MqHandlerNotFoundException(subVo.getHandler());
         }
-        if (handler.create(subVo, subscribeHandler)) {
-            if (!activeSubscribeMap.containsKey(TenantContext.get().getTenantUuid())) {
-                activeSubscribeMap.put(TenantContext.get().getTenantUuid(), new ArrayList<>());
-            }
-            activeSubscribeMap.get(TenantContext.get().getTenantUuid()).add(subVo);
+        //不管是否成功添加，都需要加入activeSubscribeMap，重连机制会从这里取数重连
+        if (!activeSubscribeMap.containsKey(TenantContext.get().getTenantUuid())) {
+            activeSubscribeMap.put(TenantContext.get().getTenantUuid(), new ArrayList<>());
         }
-        /*topicName = topicName.toLowerCase(Locale.ROOT);
-        clientName = clientName.toLowerCase(Locale.ROOT);
-        if (!containerMap.containsKey(TenantContext.get().getTenantUuid() + SEPARATOR + topicName + SEPARATOR + clientName)) {
-            String finalClientName = clientName;
-            String tenantUuid = TenantContext.get().getTenantUuid();
-            String finalTopicName = topicName;
-            MessageListenerAdapter messageAdapter = new MessageListenerAdapter() {
-                @Override
-                public void onMessage(Message message, @Nullable Session session) throws JMSException {
-                    try {
-                        subscribeHandler.onMessage((TextMessage) message, session, finalTopicName, finalClientName, tenantUuid);
-                    } catch (Exception ex) {
-                        logger.error(ex.getMessage(), ex);
-                    }
-                }
-            };
-
-            SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
-            container.setConnectionFactory(connectionFactory);
-            container.setPubSubDomain(true);
-            container.setDestinationName(TenantContext.get().getTenantUuid() + "/" + topicName);
-            container.setDurableSubscriptionName(TenantContext.get().getTenantUuid() + "/" + clientName + "/" + Config.SCHEDULE_SERVER_ID);
-            container.setSubscriptionDurable(isDurable);
-            container.setClientId(TenantContext.get().getTenantUuid() + "/" + clientName + "/" + Config.SCHEDULE_SERVER_ID);
-            container.setMessageListener(messageAdapter);
-            //container.setAutoStartup(true);
-            containerMap.put(TenantContext.get().getTenantUuid() + SEPARATOR + topicName + SEPARATOR + clientName, container);
-            try {
-                container.start();
-            } catch (Exception ex) {
-                throw new SubscribeTopicException(topicName, clientName, ex.getMessage());
-            }
-        }
-        return true;*/
+        activeSubscribeMap.get(TenantContext.get().getTenantUuid()).add(subVo);
+        
+        handler.create(subVo);
     }
 }

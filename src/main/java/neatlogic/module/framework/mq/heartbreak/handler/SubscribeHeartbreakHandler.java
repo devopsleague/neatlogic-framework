@@ -19,10 +19,7 @@ import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.common.config.Config;
 import neatlogic.framework.dao.mapper.TenantMapper;
 import neatlogic.framework.dto.TenantVo;
-import neatlogic.framework.exception.mq.SubscribeHandlerNotFoundException;
 import neatlogic.framework.heartbeat.core.IHeartbreakHandler;
-import neatlogic.framework.mq.core.ISubscribeHandler;
-import neatlogic.framework.mq.core.SubscribeHandlerFactory;
 import neatlogic.framework.mq.core.SubscribeManager;
 import neatlogic.framework.mq.dao.mapper.MqSubscribeMapper;
 import neatlogic.framework.mq.dto.SubscribeVo;
@@ -60,11 +57,7 @@ public class SubscribeHeartbreakHandler implements IHeartbreakHandler {
                         subVo.setServerId(Config.SCHEDULE_SERVER_ID);
                         mqSubscribeMapper.updateSubscribeServerId(subVo);
                         try {
-                            ISubscribeHandler subscribeHandler = SubscribeHandlerFactory.getHandler(subVo.getClassName());
-                            if (subscribeHandler == null) {
-                                throw new SubscribeHandlerNotFoundException(subVo.getClassName());
-                            }
-                            SubscribeManager.create(subVo, subscribeHandler);
+                            SubscribeManager.create(subVo);
                         } catch (Exception ex) {
                             subVo.setError(ex.getMessage());
                             mqSubscribeMapper.updateSubscribeError(subVo);

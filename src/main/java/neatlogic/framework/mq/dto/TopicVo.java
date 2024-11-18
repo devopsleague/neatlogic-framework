@@ -19,6 +19,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.annotation.JSONField;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.mq.core.IMqHandler;
+import neatlogic.framework.mq.core.MqHandlerFactory;
 import neatlogic.framework.restful.annotation.EntityField;
 import org.apache.commons.lang3.StringUtils;
 
@@ -37,6 +39,8 @@ public class TopicVo {
     private String configStr;
     @EntityField(name = "MQ类型", type = ApiParamType.STRING)
     private String handler;
+    @EntityField(name = "MQ类型名称", type = ApiParamType.STRING)
+    private String handlerName;
 
     public String getName() {
         return name;
@@ -87,6 +91,16 @@ public class TopicVo {
             }
         }
         return config;
+    }
+
+    public String getHandlerName() {
+        if (StringUtils.isNotBlank(handler) && StringUtils.isBlank(handlerName)) {
+            IMqHandler mqHandler = MqHandlerFactory.getMqHandler(handler);
+            if (mqHandler != null) {
+                handlerName = mqHandler.getLabel();
+            }
+        }
+        return handlerName;
     }
 
     public void setConfig(JSONObject config) {

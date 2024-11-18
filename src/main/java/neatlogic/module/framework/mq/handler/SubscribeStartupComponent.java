@@ -18,9 +18,6 @@ package neatlogic.module.framework.mq.handler;
 import neatlogic.framework.asynchronization.thread.NeatLogicThread;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.common.config.Config;
-import neatlogic.framework.exception.mq.SubscribeHandlerNotFoundException;
-import neatlogic.framework.mq.core.ISubscribeHandler;
-import neatlogic.framework.mq.core.SubscribeHandlerFactory;
 import neatlogic.framework.mq.core.SubscribeManager;
 import neatlogic.framework.mq.dao.mapper.MqSubscribeMapper;
 import neatlogic.framework.mq.dto.SubscribeVo;
@@ -58,11 +55,7 @@ public class SubscribeStartupComponent extends StartupBase {
             for (SubscribeVo subVo : subList) {
                 if (subVo.getIsActive().equals(1)) {
                     try {
-                        ISubscribeHandler subscribeHandler = SubscribeHandlerFactory.getHandler(subVo.getClassName());
-                        if (subscribeHandler == null) {
-                            throw new SubscribeHandlerNotFoundException(subVo.getClassName());
-                        }
-                        SubscribeManager.create(subVo, subscribeHandler);
+                        SubscribeManager.create(subVo);
                         subVo.setError("");
                     } catch (Exception ex) {
                         subVo.setError(ex.getMessage());
@@ -85,21 +78,6 @@ public class SubscribeStartupComponent extends StartupBase {
         Runnable runnable = new NeatLogicThread("MQ-SUBSCRIBE-RECONNECT") {
             @Override
             protected void execute() {
-                    /*Map<String, SimpleMessageListenerContainer> containerMap = SubscribeManager.get();
-                    if (MapUtils.isNotEmpty(containerMap)) {
-                        for (String key : containerMap.keySet()) {
-                            SimpleMessageListenerContainer container = containerMap.get(key);
-                            String[] keys = key.split(SubscribeManager.SEPARATOR);
-                            if (!container.isRunning()) {
-                                container.start();
-                                SubscribeVo subVo = new SubscribeVo();
-                                subVo.setName(keys[2]);
-                                subVo.setError("");
-                                TenantContext.get().switchTenant(keys[0]).setUseDefaultDatasource(false);
-                                mqSubscribeMapper.updateSubscribeError(subVo);
-                            }
-                        }
-                    }*/
                 Map<String, List<SubscribeVo>> activeSubscribeMap = SubscribeManager.getActiveSubscribeMap();
                 if (MapUtils.isNotEmpty(activeSubscribeMap)) {
                     for (Map.Entry<String, List<SubscribeVo>> entry : activeSubscribeMap.entrySet()) {
@@ -108,13 +86,20 @@ public class SubscribeStartupComponent extends StartupBase {
                         List<SubscribeVo> activeSubscribeList = entry.getValue();
                         for (SubscribeVo subVo : activeSubscribeList) {
                             try {
-                                SubscribeManager.reconnect(subVo);
+                                if (!SubscribeManager.isRunning(subVo)) {
+                                    try {
+                                        SubscribeManager.reconnect(subVo);
+                                        subVo.setError(null);
+                                    } catch (Exception e) {
+                                        logger.error(e.getMessage(), e);
+                                        subVo.setError(e.getMessage());
+                                    } finally {
+                                        mqSubscribeMapper.updateSubscribeError(subVo);
+                                    }
+                                }
                             } catch (Exception e) {
                                 logger.error(e.getMessage(), e);
-                                subVo.setError(e.getMessage());
-                                mqSubscribeMapper.updateSubscribeError(subVo);
                             }
-
                         }
                     }
                 }

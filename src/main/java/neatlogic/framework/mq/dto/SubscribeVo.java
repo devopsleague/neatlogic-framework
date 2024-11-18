@@ -20,6 +20,8 @@ import com.alibaba.fastjson.annotation.JSONField;
 import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.dto.BasePageVo;
+import neatlogic.framework.mq.core.IMqHandler;
+import neatlogic.framework.mq.core.MqHandlerFactory;
 import neatlogic.framework.mq.core.TopicFactory;
 import neatlogic.framework.restful.annotation.EntityField;
 import neatlogic.framework.util.SnowflakeUtil;
@@ -51,11 +53,15 @@ public class SubscribeVo extends BasePageVo {
     @EntityField(name = "配置", type = ApiParamType.JSONOBJECT)
     private JSONObject config;
     @JSONField(serialize = false)
+    private String tenantUuid;
+    @JSONField(serialize = false)
     private String configStr;
     @JSONField(serialize = false)
     private Integer serverId;
     @EntityField(name = "MQ类型", type = ApiParamType.STRING)
     private String handler;
+    @EntityField(name = "消息队列名称", type = ApiParamType.STRING)
+    private String handlerName;
 
     public String getTopicName() {
         return topicName;
@@ -72,6 +78,13 @@ public class SubscribeVo extends BasePageVo {
         return id;
     }
 
+    public String getTenantUuid() {
+        return tenantUuid;
+    }
+
+    public void setTenantUuid(String tenantUuid) {
+        this.tenantUuid = tenantUuid;
+    }
 
     public String getTopicLabel() {
         if (StringUtils.isBlank(topicLabel) && StringUtils.isNotBlank(topicName)) {
@@ -81,6 +94,20 @@ public class SubscribeVo extends BasePageVo {
             }
         }
         return topicLabel;
+    }
+
+    public String getHandlerName() {
+        if (StringUtils.isNotBlank(handler) && StringUtils.isBlank(handlerName)) {
+            IMqHandler mqHandler = MqHandlerFactory.getMqHandler(handler);
+            if (mqHandler != null) {
+                handlerName = mqHandler.getLabel();
+            }
+        }
+        return handlerName;
+    }
+
+    public void setHandlerName(String handlerName) {
+        this.handlerName = handlerName;
     }
 
     public void setTopicLabel(String topicLabel) {

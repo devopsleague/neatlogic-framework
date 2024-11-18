@@ -15,13 +15,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.framework.mq.core;
 
-import javax.jms.Session;
-import javax.jms.TextMessage;
+import neatlogic.framework.mq.dto.SubscribeVo;
 
 public interface ISubscribeHandler {
     String getName();
 
-    void onMessage(TextMessage m, Session session, String topicName, String subscribeName, String tenantUuid);
+    //void onMessage(TextMessage m, Session session, String topicName, String subscribeName, String tenantUuid);
+
+    //void onMessage(String message, String topicName, String subscribeName, String tenantUuid);
+
+    void onMessage(SubscribeVo subscribeVo, Object message);
 
     default String getClassName() {
         return this.getClass().getName();

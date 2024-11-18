@@ -42,7 +42,11 @@ public class TopicFactory extends ModuleInitializedListenerBase {
 
     public static TopicVo getTopicByName(String topicName) {
         Optional<TopicVo> op = topicList.stream().filter(t -> t.getName().equals(topicName)).findFirst();
-        return op.orElse(null);
+        if (op.isPresent()) {
+            op.get().setIsActive(1);
+            return op.get();
+        }
+        return null;
     }
 
     @Override

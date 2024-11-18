@@ -19,9 +19,11 @@ package neatlogic.module.framework.mq.mqhandler;
 
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.common.config.Config;
+import neatlogic.framework.exception.mq.SubscribeHandlerNotFoundException;
 import neatlogic.framework.exception.mq.SubscribeTopicException;
 import neatlogic.framework.mq.core.IMqHandler;
 import neatlogic.framework.mq.core.ISubscribeHandler;
+import neatlogic.framework.mq.core.SubscribeHandlerFactory;
 import neatlogic.framework.mq.dto.SubscribeVo;
 import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
 import org.slf4j.Logger;
@@ -33,7 +35,10 @@ import org.springframework.jms.listener.adapter.MessageListenerAdapter;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
-import javax.jms.*;
+import javax.jms.ConnectionFactory;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.Session;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -42,7 +47,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ActiveMqArtemisHandler implements IMqHandler {
     private static final Logger logger = LoggerFactory.getLogger(ActiveMqArtemisHandler.class);
     private static ConnectionFactory connectionFactory;
-    private static final Map<String, SimpleMessageListenerContainer> containerMap = new ConcurrentHashMap<>();
+    private static final Map<Long, SimpleMessageListenerContainer> containerMap = new ConcurrentHashMap<>();
     public static final String SEPARATOR = "#";
     protected static JmsTemplate jmsTemplate;
 
@@ -62,21 +67,29 @@ public class ActiveMqArtemisHandler implements IMqHandler {
     }
 
     @Override
-    public boolean create(SubscribeVo subVo, ISubscribeHandler subscribeHandler) throws SubscribeTopicException {
+    public String getLabel() {
+        return "ActiveMQ Artemis";
+    }
+
+
+    @Override
+    public boolean create(SubscribeVo subVo) throws SubscribeTopicException {
+        ISubscribeHandler subscribeHandler = SubscribeHandlerFactory.getHandler(subVo.getClassName());
+        if (subscribeHandler == null) {
+            throw new SubscribeHandlerNotFoundException(subVo.getClassName());
+        }
         String topicName = subVo.getTopicName();
         String clientName = subVo.getName();
         boolean isDurable = subVo.getIsDurable().equals(1);
         topicName = topicName.toLowerCase(Locale.ROOT);
         clientName = clientName.toLowerCase(Locale.ROOT);
-        if (!containerMap.containsKey(TenantContext.get().getTenantUuid() + SEPARATOR + topicName + SEPARATOR + clientName)) {
-            String finalClientName = clientName;
-            String tenantUuid = TenantContext.get().getTenantUuid();
-            String finalTopicName = topicName;
+        if (!containerMap.containsKey(subVo.getId())) {
+            subVo.setTenantUuid(TenantContext.get().getTenantUuid());
             MessageListenerAdapter messageAdapter = new MessageListenerAdapter() {
                 @Override
                 public void onMessage(Message message, @Nullable Session session) throws JMSException {
                     try {
-                        subscribeHandler.onMessage((TextMessage) message, session, finalTopicName, finalClientName, tenantUuid);
+                        subscribeHandler.onMessage(subVo, message);
                     } catch (Exception ex) {
                         logger.error(ex.getMessage(), ex);
                     }
@@ -88,11 +101,12 @@ public class ActiveMqArtemisHandler implements IMqHandler {
             container.setPubSubDomain(true);
             container.setDestinationName(TenantContext.get().getTenantUuid() + "/" + topicName);
             container.setDurableSubscriptionName(TenantContext.get().getTenantUuid() + "/" + clientName + "/" + Config.SCHEDULE_SERVER_ID);
-            container.setSubscriptionDurable(isDurable);
+            //container.setSubscriptionDurable(isDurable);
+            container.setSubscriptionDurable(false);//默认都是临时订阅，持久订阅暂时没有场景，因为订阅主题没有暂停功能
             container.setClientId(TenantContext.get().getTenantUuid() + "/" + clientName + "/" + Config.SCHEDULE_SERVER_ID);
             container.setMessageListener(messageAdapter);
             //container.setAutoStartup(true);
-            containerMap.put(TenantContext.get().getTenantUuid() + SEPARATOR + topicName + SEPARATOR + clientName, container);
+            containerMap.put(subVo.getId(), container);
             try {
                 container.start();
             } catch (Exception ex) {
@@ -103,34 +117,28 @@ public class ActiveMqArtemisHandler implements IMqHandler {
     }
 
     @Override
-    public void reconnect(SubscribeVo subscribeVo) {
-        String topicName = subscribeVo.getTopicName();
-        String clientName = subscribeVo.getName();
-        topicName = topicName.toLowerCase(Locale.ROOT);
-        clientName = clientName.toLowerCase(Locale.ROOT);
-        SimpleMessageListenerContainer container = containerMap.get(TenantContext.get().getTenantUuid() + SEPARATOR + topicName + SEPARATOR + clientName);
-        if (container != null && !container.isRunning()) {
-            container.start();
-        }
+    public void reconnect(SubscribeVo subscribeVo) throws SubscribeTopicException {
+        this.destroy(subscribeVo);
+        this.create(subscribeVo);
+    }
+
+    @Override
+    public boolean isRunning(SubscribeVo subscribeVo) {
+        SimpleMessageListenerContainer container = containerMap.get(subscribeVo.getId());
+        return container != null && container.isRunning();
     }
 
     @Override
     public void destroy(SubscribeVo subscribeVo) {
-        SimpleMessageListenerContainer container = containerMap.get(TenantContext.get().getTenantUuid()
-                + SEPARATOR
-                + subscribeVo.getTopicName().toLowerCase()
-                + SEPARATOR
-                + subscribeVo.getName().toLowerCase());
-        if (container.isRunning()) {
-            container.stop();
+        SimpleMessageListenerContainer container = containerMap.get(subscribeVo.getId());
+        if (container != null) {
+            if (container.isRunning()) {
+                container.stop();
+            }
+            container.shutdown();
+            container.destroy();
+            containerMap.remove(subscribeVo.getId());
         }
-        container.shutdown();
-        container.destroy();
-        containerMap.remove(TenantContext.get().getTenantUuid()
-                + SEPARATOR
-                + subscribeVo.getTopicName().toLowerCase()
-                + SEPARATOR
-                + subscribeVo.getName().toLowerCase());
     }
 
     @Override

@@ -52,6 +52,10 @@ public abstract class TopicBase<T> implements ITopic<T> {
             job.execute(content, t -> {
                 String topicName = this.getName().toLowerCase(Locale.ROOT);
                 TopicVo topicVo = mqTopicMapper.getTopicByName(topicName);
+                //如果数据库没有主题设置数据，尝试在内存中加载
+                if (topicVo == null) {
+                    topicVo = TopicFactory.getTopicByName(topicName);
+                }
                 if (topicVo != null && StringUtils.isNotBlank(topicVo.getHandler()) && Objects.equals(topicVo.getIsActive(), 1)) {
                     IMqHandler handler = MqHandlerFactory.getMqHandler(topicVo.getHandler());
                     if (handler != null) {

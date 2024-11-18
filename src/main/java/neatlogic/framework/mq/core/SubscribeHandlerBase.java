@@ -21,9 +21,6 @@ import neatlogic.framework.mq.dao.mapper.MqSubscribeMapper;
 import neatlogic.framework.mq.dto.SubscribeVo;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.jms.Session;
-import javax.jms.TextMessage;
-
 public abstract class SubscribeHandlerBase implements ISubscribeHandler {
     protected static MqSubscribeMapper mqSubscribeMapper;
 
@@ -32,8 +29,24 @@ public abstract class SubscribeHandlerBase implements ISubscribeHandler {
         mqSubscribeMapper = _mqSubscribeMapper;
     }
 
-
     @Override
+    public final void onMessage(SubscribeVo subscribeVo, Object message) {
+        //由于这是通过MQ监听触发的线程，因此需要自己初始化TenantContext
+        TenantContext.init();
+        TenantContext.get().switchTenant(subscribeVo.getTenantUuid()).setUseDefaultDatasource(false);
+        //从DB再查一次订阅信息，检查订阅是否仍然有效
+        SubscribeVo checkSubscribeVo = mqSubscribeMapper.getSubscribeByName(subscribeVo.getName());
+        //如果订阅已经被删除或被禁用，则直接从删除订阅
+        if (checkSubscribeVo != null && checkSubscribeVo.getIsActive().equals(1) && checkSubscribeVo.getServerId().equals(Config.SCHEDULE_SERVER_ID)) {
+            //System.out.println(clientName);
+            myOnMessage(checkSubscribeVo, message);
+        } else if (checkSubscribeVo != null && checkSubscribeVo.getIsActive().equals(0)) {
+            SubscribeManager.destroy(subscribeVo);
+        }
+    }
+
+
+   /* @Override
     public final void onMessage(TextMessage m, Session session, String topicName, String clientName, String tenantUuid) {
         //由于这是通过MQ监听触发的线程，因此需要自己初始化TenantContext
         TenantContext.init();
@@ -46,7 +59,9 @@ public abstract class SubscribeHandlerBase implements ISubscribeHandler {
         } else if (subscribeVo != null && subscribeVo.getIsActive().equals(0)) {
             SubscribeManager.destroy(subscribeVo);
         }
-    }
+    }*/
 
-    protected abstract void myOnMessage(TextMessage m);
+    //protected abstract void myOnMessage(TextMessage m);
+
+    protected abstract void myOnMessage(SubscribeVo subscribeVo, Object message);
 }
