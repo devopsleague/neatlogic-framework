@@ -17,8 +17,10 @@ package neatlogic.framework.mq.core;
 
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.common.RootComponent;
+import neatlogic.framework.exception.mq.MqHandlerNotEnableException;
 import neatlogic.framework.exception.mq.MqHandlerNotFoundException;
 import neatlogic.framework.exception.mq.SubscribeTopicException;
+import neatlogic.framework.exception.mq.TopicNotFoundException;
 import neatlogic.framework.mq.dto.SubscribeVo;
 
 import java.util.ArrayList;
@@ -39,6 +41,8 @@ public final class SubscribeManager {
         IMqHandler handler = MqHandlerFactory.getMqHandler(subscribeVo.getHandler());
         if (handler != null) {
             handler.reconnect(subscribeVo);
+        } else {
+            throw new MqHandlerNotFoundException(subscribeVo.getHandler());
         }
     }
 
@@ -56,12 +60,17 @@ public final class SubscribeManager {
         }
     }
 
-    public static boolean isRunning(SubscribeVo subVo) {
+    public static boolean needReconnect(SubscribeVo subVo) {
         IMqHandler handler = MqHandlerFactory.getMqHandler(subVo.getHandler());
         if (handler != null) {
-            return handler.isRunning(subVo);
+            if (handler.isEnable()) {
+                return !handler.isRunning(subVo);
+            } else {
+                return false;
+            }
+        } else {
+            return false;
         }
-        return false;
     }
 
     /**
@@ -70,17 +79,22 @@ public final class SubscribeManager {
      * @return 是否成功
      */
     public static void create(SubscribeVo subVo) throws SubscribeTopicException, ExecutionException, InterruptedException {
-
         IMqHandler handler = MqHandlerFactory.getMqHandler(subVo.getHandler());
         if (handler == null) {
             throw new MqHandlerNotFoundException(subVo.getHandler());
         }
-        //不管是否成功添加，都需要加入activeSubscribeMap，重连机制会从这里取数重连
-        if (!activeSubscribeMap.containsKey(TenantContext.get().getTenantUuid())) {
-            activeSubscribeMap.put(TenantContext.get().getTenantUuid(), new ArrayList<>());
+        if (handler.isEnable()) {
+            if (!TopicFactory.hasTopic(subVo.getTopicName())) {
+                throw new TopicNotFoundException(subVo.getTopicName());
+            }
+            //不管是否成功添加，都需要加入activeSubscribeMap，重连机制会从这里取数重连
+            if (!activeSubscribeMap.containsKey(TenantContext.get().getTenantUuid())) {
+                activeSubscribeMap.put(TenantContext.get().getTenantUuid(), new ArrayList<>());
+            }
+            activeSubscribeMap.get(TenantContext.get().getTenantUuid()).add(subVo);
+            handler.create(subVo);
+        } else {
+            throw new MqHandlerNotEnableException(handler.getLabel());
         }
-        activeSubscribeMap.get(TenantContext.get().getTenantUuid()).add(subVo);
-        
-        handler.create(subVo);
     }
 }

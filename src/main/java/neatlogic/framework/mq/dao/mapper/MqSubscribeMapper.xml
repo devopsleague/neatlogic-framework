@@ -32,6 +32,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.-->
             <if test="isActive != null">
                 AND is_active = #{isActive}
             </if>
+            <if test="serverId != null">
+                AND server_id = #{serverId}
+            </if>
         </where>
     </sql>
 
@@ -58,6 +61,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.-->
         handler AS handler
         FROM mq_subscribe
         <include refid="searchSubscribeCondition"></include>
+        order by id desc
+        limit #{startNum}, #{pageSize}
     </select>
 
     <select id="getSubscribeByName" parameterType="java.lang.String"
@@ -141,6 +146,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.-->
     <update id="updateSubscribeError" parameterType="neatlogic.framework.mq.dto.SubscribeVo">
         UPDATE mq_subscribe
         SET error = #{error}
+        <if test="isActive != null">
+            ,is_active = #{isActive}
+        </if>
         WHERE name = #{name}
     </update>
 

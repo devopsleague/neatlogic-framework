@@ -41,6 +41,8 @@ public class TopicVo {
     private String handler;
     @EntityField(name = "MQ类型名称", type = ApiParamType.STRING)
     private String handlerName;
+    @EntityField(name = "是否启用", type = ApiParamType.BOOLEAN)
+    private Boolean isEnable;
 
     public String getName() {
         return name;
@@ -67,6 +69,12 @@ public class TopicVo {
     }
 
     public Integer getIsActive() {
+        if (isActive != null && isActive.equals(1)) {
+            IMqHandler mqHandler = MqHandlerFactory.getMqHandler(handler);
+            if (mqHandler == null || !mqHandler.isEnable()) {
+                return 0;
+            }
+        }
         return isActive;
     }
 
@@ -91,6 +99,16 @@ public class TopicVo {
             }
         }
         return config;
+    }
+
+    public Boolean getIsEnable() {
+        if (StringUtils.isNotBlank(handler) && isEnable == null) {
+            IMqHandler mqHandler = MqHandlerFactory.getMqHandler(handler);
+            if (mqHandler != null) {
+                isEnable = mqHandler.isEnable();
+            }
+        }
+        return isEnable;
     }
 
     public String getHandlerName() {

@@ -49,6 +49,10 @@ public class TopicFactory extends ModuleInitializedListenerBase {
         return null;
     }
 
+    public static boolean hasTopic(String topicName) {
+        return topicList.stream().anyMatch(d -> d.getName().equals(topicName));
+    }
+
     @Override
     public void onInitialized(NeatLogicWebApplicationContext context) {
         Map<String, ITopic> myMap = context.getBeansOfType(ITopic.class);

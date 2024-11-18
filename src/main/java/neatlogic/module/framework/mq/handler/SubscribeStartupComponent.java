@@ -50,20 +50,26 @@ public class SubscribeStartupComponent extends StartupBase {
     public int executeForCurrentTenant() {
         SubscribeVo subscribeVo = new SubscribeVo();
         subscribeVo.setIsActive(1);
+        subscribeVo.setServerId(Config.SCHEDULE_SERVER_ID);
+        subscribeVo.setPageSize(100);
+        subscribeVo.setCurrentPage(1);
         List<SubscribeVo> subList = mqSubscribeMapper.searchSubscribe(subscribeVo);
-        if (CollectionUtils.isNotEmpty(subList)) {
+        while (CollectionUtils.isNotEmpty(subList)) {
             for (SubscribeVo subVo : subList) {
                 if (subVo.getIsActive().equals(1)) {
                     try {
                         SubscribeManager.create(subVo);
                         subVo.setError("");
                     } catch (Exception ex) {
+                        subVo.setIsActive(0);
                         subVo.setError(ex.getMessage());
                     } finally {
                         mqSubscribeMapper.updateSubscribeError(subVo);
                     }
                 }
             }
+            subscribeVo.setCurrentPage(subscribeVo.getCurrentPage() + 1);
+            subList = mqSubscribeMapper.searchSubscribe(subscribeVo);
         }
         return 0;
     }
@@ -86,10 +92,11 @@ public class SubscribeStartupComponent extends StartupBase {
                         List<SubscribeVo> activeSubscribeList = entry.getValue();
                         for (SubscribeVo subVo : activeSubscribeList) {
                             try {
-                                if (!SubscribeManager.isRunning(subVo)) {
+                                if (!SubscribeManager.needReconnect(subVo)) {
                                     try {
                                         SubscribeManager.reconnect(subVo);
                                         subVo.setError(null);
+                                        subVo.setIsActive(1);
                                     } catch (Exception e) {
                                         logger.error(e.getMessage(), e);
                                         subVo.setError(e.getMessage());

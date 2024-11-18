@@ -588,8 +588,8 @@ public class Config {
             MONGO_PASSWORD = prop.getProperty("mongo.password", "root");
             MONGO_DATABASE = prop.getProperty("mongo.database", "neatlogic");
 
-            JMS_URL = prop.getProperty("jms.url", "tcp://localhost:61616");
-            KAFKA_URL = prop.getProperty("kafka.url", "localhost:9092");
+            JMS_URL = prop.getProperty("jms.url"/*, "tcp://localhost:61616"*/);
+            KAFKA_URL = prop.getProperty("kafka.url"/*, "localhost:9092"*/);
 
             FILE_HANDLER = prop.getProperty("file.handler", "FILE");
 

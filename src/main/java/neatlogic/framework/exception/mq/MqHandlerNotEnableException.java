@@ -17,8 +17,8 @@ package neatlogic.framework.exception.mq;
 
 import neatlogic.framework.exception.core.ApiRuntimeException;
 
-public class MqHandlerNotFoundException extends ApiRuntimeException {
-    public MqHandlerNotFoundException(String name) {
-        super("找不到消息队列组件“{0}”", name);
+public class MqHandlerNotEnableException extends ApiRuntimeException {
+    public MqHandlerNotEnableException(String name) {
+        super("消息队列组件“{0}”没有启用", name);
     }
 }

@@ -36,4 +36,6 @@ public interface IMqHandler {
     void destroy(SubscribeVo subscribeVo);
 
     void send(String topicName, String content);
+
+    boolean isEnable();
 }

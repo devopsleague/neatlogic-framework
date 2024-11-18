@@ -62,6 +62,8 @@ public class SubscribeVo extends BasePageVo {
     private String handler;
     @EntityField(name = "消息队列名称", type = ApiParamType.STRING)
     private String handlerName;
+    @EntityField(name = "是否启用", type = ApiParamType.BOOLEAN)
+    private Boolean isEnable;
 
     public String getTopicName() {
         return topicName;
@@ -69,6 +71,10 @@ public class SubscribeVo extends BasePageVo {
 
     public void setTopicName(String topicName) {
         this.topicName = topicName;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Long getId() {
@@ -80,6 +86,16 @@ public class SubscribeVo extends BasePageVo {
 
     public String getTenantUuid() {
         return tenantUuid;
+    }
+
+    public Boolean getIsEnable() {
+        if (StringUtils.isNotBlank(handler) && isEnable == null) {
+            IMqHandler mqHandler = MqHandlerFactory.getMqHandler(handler);
+            if (mqHandler != null) {
+                isEnable = mqHandler.isEnable();
+            }
+        }
+        return isEnable;
     }
 
     public void setTenantUuid(String tenantUuid) {
@@ -182,6 +198,15 @@ public class SubscribeVo extends BasePageVo {
     }
 
     public Integer getIsActive() {
+        if (isActive != null && isActive.equals(1)) {
+            IMqHandler mqHandler = MqHandlerFactory.getMqHandler(handler);
+            if (mqHandler == null || !mqHandler.isEnable()) {
+                return 0;
+            }
+            if (!TopicFactory.hasTopic(topicName)) {
+                return 0;
+            }
+        }
         return isActive;
     }
 
