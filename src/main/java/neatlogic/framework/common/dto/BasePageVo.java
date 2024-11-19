@@ -151,13 +151,6 @@ public class BasePageVo implements Serializable {
         }
     }
 
-    //批量插入处理场景
-    public void setPageSizeBatch(Integer pageSize) {
-        if (pageSize != null && pageSize > 0) {
-            this.pageSize = Math.min(1000, pageSize);
-        }
-    }
-
     public Integer getPageSizePlus() {
         return this.getPageSize() + 1;
     }

@@ -1,6 +1,5 @@
 package neatlogic.framework.common.util;
 
-import neatlogic.framework.exception.runner.IPIsIncorrectException;
 import neatlogic.framework.exception.util.IpSubnetMaskException;
 import neatlogic.framework.util.RegexUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -50,7 +49,8 @@ public class IpUtil {
             return false;
         }
         if(!RegexUtils.isMatch(ip,RegexUtils.IP)){
-            throw new IPIsIncorrectException(ip);
+            //throw new IPIsIncorrectException(ip);
+            return false;
         }
         if(subnetMask == 0){ //掩码为0则表示匹配所有ip -by波哥
             return true;
