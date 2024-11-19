@@ -44,6 +44,7 @@ import neatlogic.framework.transaction.core.EscapeTransactionJob;
 import neatlogic.framework.util.Md5Util;
 import neatlogic.framework.util.TableResultUtil;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -449,6 +450,9 @@ public class ViewDataSourceHandler extends MatrixDataSourceHandlerBase {
             //对valueList去重
             List<Map<String, String>> distinctList = new ArrayList<>();
             for (Map<String, String> valueMap : valueList) {
+                if (MapUtils.isEmpty(valueMap)) {
+                    continue;
+                }
                 if(distinctList.contains(valueMap)){
                     continue;
                 }

@@ -58,7 +58,7 @@ public abstract class TopicBase<T> implements ITopic<T> {
                 }
                 if (topicVo != null && StringUtils.isNotBlank(topicVo.getHandler()) && Objects.equals(topicVo.getIsActive(), 1)) {
                     IMqHandler handler = MqHandlerFactory.getMqHandler(topicVo.getHandler());
-                    if (handler != null) {
+                    if (handler != null && handler.isEnable()) {
                         JSONObject contentObj = generateTopicContent(topicVo, content);
                         if (MapUtils.isNotEmpty(contentObj)) {
                             String msg = contentObj.toString();

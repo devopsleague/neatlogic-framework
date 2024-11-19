@@ -26,6 +26,7 @@ import neatlogic.framework.mq.core.ISubscribeHandler;
 import neatlogic.framework.mq.core.SubscribeHandlerFactory;
 import neatlogic.framework.mq.dto.SubscribeVo;
 import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -150,5 +151,8 @@ public class ActiveMqArtemisHandler implements IMqHandler {
         }
     }
 
-
+    @Override
+    public boolean isEnable() {
+        return StringUtils.isNotBlank(Config.JMS_URL());
+    }
 }

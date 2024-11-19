@@ -25,6 +25,7 @@ import neatlogic.framework.mq.core.IMqHandler;
 import neatlogic.framework.mq.core.ISubscribeHandler;
 import neatlogic.framework.mq.core.SubscribeHandlerFactory;
 import neatlogic.framework.mq.dto.SubscribeVo;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.ListTopicsResult;
 import org.apache.kafka.clients.admin.NewTopic;
@@ -68,6 +69,7 @@ public class KafkaHandler implements IMqHandler {
         producerProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         producerProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
     }
+
 
     @Override
     public String getName() {
@@ -171,5 +173,10 @@ public class KafkaHandler implements IMqHandler {
         } catch (Exception ex) {
             logger.error("发送消息到Kafka失败，异常：{}", ex.getMessage());
         }
+    }
+
+    @Override
+    public boolean isEnable() {
+        return StringUtils.isNotBlank(Config.KAFKA_URL());
     }
 }

@@ -21,12 +21,15 @@ import neatlogic.framework.applicationlistener.core.ModuleInitializedListenerBas
 import neatlogic.framework.bootstrap.NeatLogicWebApplicationContext;
 import neatlogic.framework.common.RootComponent;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RootComponent
 public class MqHandlerFactory extends ModuleInitializedListenerBase {
     private static final Map<String, IMqHandler> componentMap = new HashMap<>();
+    private static final List<IMqHandler> handlerList = new ArrayList<>();
 
     @Override
     protected void onInitialized(NeatLogicWebApplicationContext context) {
@@ -34,11 +37,16 @@ public class MqHandlerFactory extends ModuleInitializedListenerBase {
         for (Map.Entry<String, IMqHandler> entry : myMap.entrySet()) {
             IMqHandler component = entry.getValue();
             componentMap.put(component.getName(), component);
+            handlerList.add(component);
         }
     }
 
     public static IMqHandler getMqHandler(String componentName) {
         return componentMap.get(componentName);
+    }
+
+    public static List<IMqHandler> getMqHandlerList() {
+        return handlerList;
     }
 
     @Override
