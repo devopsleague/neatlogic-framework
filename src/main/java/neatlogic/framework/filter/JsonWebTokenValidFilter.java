@@ -33,8 +33,6 @@ import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.exception.core.ApiRuntimeException;
 import neatlogic.framework.filter.core.ILoginAuthHandler;
 import neatlogic.framework.filter.core.LoginAuthFactory;
-import neatlogic.framework.login.core.ILoginPostProcessor;
-import neatlogic.framework.login.core.LoginPostProcessorFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -127,9 +125,6 @@ public class JsonWebTokenValidFilter extends OncePerRequestFilter {
                         userVo = loginAuth.auth(cachedRequest, response);
                         if (userVo != null && StringUtils.isNotBlank(userVo.getUuid())) {
                             logger.debug("======= getUser succeed: " + userVo.getUuid());
-                            for (ILoginPostProcessor loginPostProcessor : LoginPostProcessorFactory.getLoginPostProcessorSet()) {
-                                loginPostProcessor.loginAfterInitialization();
-                            }
                         } else {
                             returnErrorResponseJson(ResponseCode.AUTH_FAILED, response, loginAuth.directUrl(), loginAuth.getType());
                             return;

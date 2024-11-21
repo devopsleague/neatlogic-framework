@@ -150,10 +150,10 @@ public final class RegexUtils {
         if (StringUtils.isNotEmpty(source) && StringUtils.isNotEmpty(regex)) {
             Pattern pattern = regexPatternMap.get(regex);
             Matcher matcher = pattern.matcher(source);
-            boolean isMatcher = matcher.matches();
-            if (!isMatcher) {
-                logger.error(Arrays.toString(Thread.currentThread().getStackTrace()) + " 字符串不符合sql排序的规范");
-            }
+//            boolean isMatcher = matcher.matches();
+//            if (!isMatcher) {
+//                logger.error(Arrays.toString(Thread.currentThread().getStackTrace()) + " 字符串不符合sql排序的规范");
+//            }
             return matcher.matches();
         } else {
             return false;
