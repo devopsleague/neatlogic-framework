@@ -33,8 +33,6 @@ import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.exception.core.ApiRuntimeException;
 import neatlogic.framework.filter.core.ILoginAuthHandler;
 import neatlogic.framework.filter.core.LoginAuthFactory;
-import neatlogic.framework.login.core.ILoginPostProcessor;
-import neatlogic.framework.login.core.LoginPostProcessorFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -127,9 +125,6 @@ public class JsonWebTokenValidFilter extends OncePerRequestFilter {
                         userVo = loginAuth.auth(cachedRequest, response);
                         if (userVo != null && StringUtils.isNotBlank(userVo.getUuid())) {
                             logger.debug("======= getUser succeed: " + userVo.getUuid());
-                            for (ILoginPostProcessor loginPostProcessor : LoginPostProcessorFactory.getLoginPostProcessorSet()) {
-                                loginPostProcessor.loginAfterInitialization();
-                            }
                         } else {
                             returnErrorResponseJson(ResponseCode.AUTH_FAILED, response, loginAuth.directUrl(), loginAuth.getType());
                             return;
@@ -241,6 +236,7 @@ public class JsonWebTokenValidFilter extends OncePerRequestFilter {
      */
     private boolean userExpirationValid(UserVo userVo, String timezone, HttpServletRequest request, HttpServletResponse response) {
         JwtVo jwt = userVo.getJwtVo();
+        Object authenticationInfoStr = UserSessionCache.getItem(jwt.getTokenHash());
         if (!UserSessionCache.containsKey(jwt.getTokenHash())) {
             UserSessionVo userSessionVo = userSessionMapper.getUserSessionByTokenHash(jwt.getTokenHash());
             if (null != userSessionVo && (jwt.validTokenCreateTime(userSessionVo.getTokenCreateTime()))) {
@@ -260,7 +256,6 @@ public class JsonWebTokenValidFilter extends OncePerRequestFilter {
                 userSessionMapper.deleteUserSessionByTokenHash(jwt.getTokenHash());
             }
         } else {
-            Object authenticationInfoStr = UserSessionCache.getItem(jwt.getTokenHash());
             AuthenticationInfoVo authenticationInfoVo;
             if (authenticationInfoStr == null) {
                 authenticationInfoVo = new AuthenticationInfoVo();

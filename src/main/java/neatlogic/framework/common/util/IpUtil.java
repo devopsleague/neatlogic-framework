@@ -47,7 +47,7 @@ public class IpUtil {
      */
     public static boolean isBelongSegment(String ip, String networkIp, int subnetMask) throws IpSubnetMaskException {
         if (StringUtils.isEmpty(ip)) {
-            return false;
+            throw new IPIsIncorrectException(ip);
         }
         if(!RegexUtils.isMatch(ip,RegexUtils.IP)){
             throw new IPIsIncorrectException(ip);

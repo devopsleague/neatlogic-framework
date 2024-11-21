@@ -23,9 +23,14 @@ import neatlogic.framework.common.constvalue.DeviceType;
 import neatlogic.framework.common.util.CommonUtil;
 import neatlogic.framework.dao.cache.UserSessionCache;
 import neatlogic.framework.dao.mapper.*;
-import neatlogic.framework.dto.*;
+import neatlogic.framework.dto.AuthenticationInfoVo;
+import neatlogic.framework.dto.JwtVo;
+import neatlogic.framework.dto.UserSessionVo;
+import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.dto.captcha.LoginFailedCountVo;
 import neatlogic.framework.filter.InsertUserSessionThread;
+import neatlogic.framework.login.core.ILoginPostProcessor;
+import neatlogic.framework.login.core.LoginPostProcessorFactory;
 import neatlogic.framework.service.AuthenticationInfoService;
 import neatlogic.framework.util.Md5Util;
 import org.apache.commons.collections4.CollectionUtils;
@@ -112,6 +117,7 @@ public abstract class LoginAuthHandlerBase implements ILoginAuthHandler {
             AuthenticationInfoVo authenticationInfoVo = null;
             jwtVo.setToken(getToken(userVo));
             Object authenticationInfo = UserSessionCache.getItem(jwtVo.getTokenHash());
+            boolean isNeedLoginPost = false;
             if (!UserSessionCache.containsKey(jwtVo.getTokenHash())) {
                 logger.debug("======= tokenHash: {}", jwtVo.getTokenHash());
                 String authInfoHash = null;
@@ -129,14 +135,21 @@ public abstract class LoginAuthHandlerBase implements ILoginAuthHandler {
                 UserSessionVo userSessionVo = new UserSessionVo(userVo.getUuid(), jwtVo.getToken(), jwtVo.getTokenHash(), jwtVo.getTokenCreateTime(), authInfoHash, authenticationInfoStr);
                 InsertUserSessionThread.addInsertUserSession(userSessionVo);
                 UserSessionCache.addItem(jwtVo.getTokenHash(), authenticationInfoStr);
-
+                UserContext.init(userVo, authenticationInfoVo, "+8:00", request, response);
+                isNeedLoginPost = true;
             } else {
                 if (authenticationInfo != null) {
                     authenticationInfoVo = JSON.toJavaObject(JSON.parseObject(authenticationInfo.toString()), AuthenticationInfoVo.class);
+                    UserContext.init(userVo, authenticationInfoVo, "+8:00", request, response);
                 }
             }
-            UserContext.init(userVo, authenticationInfoVo, "+8:00", request, response);
             userVo.setJwtVo(jwtVo);
+            UserContext.init(userVo, authenticationInfoVo, "+8:00", request, response);
+            if (isNeedLoginPost) {
+                for (ILoginPostProcessor loginPostProcessor : LoginPostProcessorFactory.getLoginPostProcessorSet()) {
+                    loginPostProcessor.loginAfterInitialization();
+                }
+            }
         }
         return userVo;
     }
