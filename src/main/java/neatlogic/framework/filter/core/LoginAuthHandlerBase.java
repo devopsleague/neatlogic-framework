@@ -135,12 +135,10 @@ public abstract class LoginAuthHandlerBase implements ILoginAuthHandler {
                 UserSessionVo userSessionVo = new UserSessionVo(userVo.getUuid(), jwtVo.getToken(), jwtVo.getTokenHash(), jwtVo.getTokenCreateTime(), authInfoHash, authenticationInfoStr);
                 InsertUserSessionThread.addInsertUserSession(userSessionVo);
                 UserSessionCache.addItem(jwtVo.getTokenHash(), authenticationInfoStr);
-                UserContext.init(userVo, authenticationInfoVo, "+8:00", request, response);
                 isNeedLoginPost = true;
             } else {
                 if (authenticationInfo != null) {
                     authenticationInfoVo = JSON.toJavaObject(JSON.parseObject(authenticationInfo.toString()), AuthenticationInfoVo.class);
-                    UserContext.init(userVo, authenticationInfoVo, "+8:00", request, response);
                 }
             }
             userVo.setJwtVo(jwtVo);
