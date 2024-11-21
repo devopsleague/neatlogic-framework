@@ -15,7 +15,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.framework.lcs;
 
-import neatlogic.framework.lcs.exception.LineHandlerNotFoundException;
 import neatlogic.framework.lcs.linehandler.core.ILineHandler;
 import neatlogic.framework.lcs.linehandler.core.LineHandlerFactory;
 import org.apache.commons.collections4.CollectionUtils;
@@ -1016,26 +1015,25 @@ public class LCSUtil {
                     newLine.setChangeType("update");
                     String handler = oldLine.getHandler();
                     ILineHandler lineHandler = LineHandlerFactory.getHandler(handler);
-                    if (lineHandler == null) {
-                        throw new LineHandlerNotFoundException(handler);
-                    }
-                    String oldMainBody = lineHandler.getMainBody(oldLine);
-                    String newMainBody = lineHandler.getMainBody(newLine);
-                    if (lineHandler.needCompare()) {
-                        if (StringUtils.length(oldMainBody) == 0) {
-                            lineHandler.setMainBody(newLine, "<span class='insert'>" + newMainBody + "</span>");
-                        } else if (StringUtils.length(newMainBody) == 0) {
-                            lineHandler.setMainBody(oldLine, "<span class='delete'>" + oldMainBody + "</span>");
-                        } else {
-                            List<SegmentRange> oldSegmentRangeList = new ArrayList<>();
-                            List<SegmentRange> newSegmentRangeList = new ArrayList<>();
-                            List<SegmentPair> segmentPairList = LCSUtil.LCSCompare(oldMainBody, newMainBody);
-                            for (SegmentPair segmentpair : segmentPairList) {
-                                oldSegmentRangeList.add(new SegmentRange(segmentpair.getOldBeginIndex(), segmentpair.getOldEndIndex(), segmentpair.isMatch()));
-                                newSegmentRangeList.add(new SegmentRange(segmentpair.getNewBeginIndex(), segmentpair.getNewEndIndex(), segmentpair.isMatch()));
+                    if (lineHandler != null) {
+                        if (lineHandler.needCompare()) {
+                            String oldMainBody = lineHandler.getMainBody(oldLine);
+                            String newMainBody = lineHandler.getMainBody(newLine);
+                            if (StringUtils.length(oldMainBody) == 0) {
+                                lineHandler.setMainBody(newLine, "<span class='insert'>" + newMainBody + "</span>");
+                            } else if (StringUtils.length(newMainBody) == 0) {
+                                lineHandler.setMainBody(oldLine, "<span class='delete'>" + oldMainBody + "</span>");
+                            } else {
+                                List<SegmentRange> oldSegmentRangeList = new ArrayList<>();
+                                List<SegmentRange> newSegmentRangeList = new ArrayList<>();
+                                List<SegmentPair> segmentPairList = LCSUtil.LCSCompare(oldMainBody, newMainBody);
+                                for (SegmentPair segmentpair : segmentPairList) {
+                                    oldSegmentRangeList.add(new SegmentRange(segmentpair.getOldBeginIndex(), segmentpair.getOldEndIndex(), segmentpair.isMatch()));
+                                    newSegmentRangeList.add(new SegmentRange(segmentpair.getNewBeginIndex(), segmentpair.getNewEndIndex(), segmentpair.isMatch()));
+                                }
+                                lineHandler.setMainBody(oldLine, LCSUtil.wrapChangePlace(oldMainBody, oldSegmentRangeList, "<span class='delete'>", "</span>"));
+                                lineHandler.setMainBody(newLine, LCSUtil.wrapChangePlace(newMainBody, newSegmentRangeList, "<span class='insert'>", "</span>"));
                             }
-                            lineHandler.setMainBody(oldLine, LCSUtil.wrapChangePlace(oldMainBody, oldSegmentRangeList, "<span class='delete'>", "</span>"));
-                            lineHandler.setMainBody(newLine, LCSUtil.wrapChangePlace(newMainBody, newSegmentRangeList, "<span class='insert'>", "</span>"));
                         }
                     }
                     oldResultList.add(oldLine);
@@ -1094,26 +1092,32 @@ public class LCSUtil {
         NodePool nodePool = new NodePool(sourceCount, targetCount);
         for (int i = sourceCount - 1; i >= 0; i--) {
             for (int j = targetCount - 1; j >= 0; j--) {
+                String oldMainBody = "";
+                String newMainBody = "";
                 Node currentNode = new Node(i, j);
                 BaseLineVo oldLine = source.get(i);
                 BaseLineVo newLine = target.get(j);
                 String oldHandler = oldLine.getHandler();
                 ILineHandler oldLineHandler = LineHandlerFactory.getHandler(oldHandler);
-                if (oldLineHandler == null) {
-                    throw new LineHandlerNotFoundException(oldHandler);
+//                if (oldLineHandler == null) {
+//                    throw new LineHandlerNotFoundException(oldHandler);
+//                }
+                if (oldLineHandler != null) {
+                    oldMainBody = oldLineHandler.getMainBody(oldLine);
                 }
                 String newHandler = newLine.getHandler();
                 ILineHandler newLineHandler = LineHandlerFactory.getHandler(newHandler);
-                if (newLineHandler == null) {
-                    throw new LineHandlerNotFoundException(newHandler);
+//                if (newLineHandler == null) {
+//                    throw new LineHandlerNotFoundException(newHandler);
+//                }
+                if (newLineHandler != null) {
+                    newMainBody = newLineHandler.getMainBody(newLine);
                 }
-                String oldMainBody = oldLineHandler.getMainBody(oldLine);
-                String newMainBody = newLineHandler.getMainBody(newLine);
                 int oldLineContentLength = StringUtils.length(oldMainBody);
                 int newLineContentLength = StringUtils.length(newMainBody);
                 int minEditDistance = 0;
                 if (oldLine.getHandler().equals(newLine.getHandler())) {
-                    if (oldLineHandler.needCompare() && oldLineContentLength > 0 && newLineContentLength > 0) {
+                    if (oldLineHandler != null && oldLineHandler.needCompare() && oldLineContentLength > 0 && newLineContentLength > 0) {
                         minEditDistance = LCSUtil.minEditDistance(oldMainBody, newMainBody);
                     } else {
                         minEditDistance = oldLineContentLength + newLineContentLength;
