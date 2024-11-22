@@ -214,7 +214,7 @@ public class JsonWebTokenValidFilter extends OncePerRequestFilter {
      * @throws IOException 异常
      */
     private void returnErrorResponseJson(ResponseCode responseCode, HttpServletResponse response, boolean isRemoveCookie, Object... args) throws Exception {
-        returnErrorResponseJson(false, responseCode, response, null, args);
+        returnErrorResponseJson(isRemoveCookie, responseCode, response, null, args);
     }
 
     /**
