@@ -152,7 +152,7 @@ public class JsonWebTokenValidFilter extends OncePerRequestFilter {
             logger.error(ex.getMessage(), ex);
             try {
                 // 不返回跳转地址，直接到显示错误信息页面
-                returnErrorResponseJson(ResponseCode.API_RUNTIME, response, loginAuth != null ? loginAuth.directUrl() : defaultLoginAuth.directUrl(), false, ex.getMessage());
+                returnErrorResponseJson(false,ResponseCode.API_RUNTIME, response, loginAuth != null ? loginAuth.directUrl() : defaultLoginAuth.directUrl(), ex.getMessage());
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
                 throw new ApiRuntimeException(e);
@@ -160,7 +160,7 @@ public class JsonWebTokenValidFilter extends OncePerRequestFilter {
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
             try {
-                returnErrorResponseJson(ResponseCode.AUTH_FAILED, response, loginAuth != null ? loginAuth.directUrl() : defaultLoginAuth.directUrl(), false, ex.getMessage());
+                returnErrorResponseJson(false,ResponseCode.AUTH_FAILED, response, loginAuth != null ? loginAuth.directUrl() : defaultLoginAuth.directUrl(), ex.getMessage());
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
                 throw new ApiRuntimeException(e);
@@ -177,7 +177,7 @@ public class JsonWebTokenValidFilter extends OncePerRequestFilter {
      * @param args         异常码构造入参
      * @throws IOException 异常
      */
-    private void returnErrorResponseJson(ResponseCode responseCode, HttpServletResponse response, String directUrl, boolean isRemoveCookie, Object... args) throws Exception {
+    private void returnErrorResponseJson(boolean isRemoveCookie, ResponseCode responseCode, HttpServletResponse response, String directUrl, Object... args) throws Exception {
         JSONObject redirectObj = new JSONObject();
         String message = responseCode.getMessage(args);
         redirectObj.put("Status", "FAILED");
@@ -202,7 +202,7 @@ public class JsonWebTokenValidFilter extends OncePerRequestFilter {
      * @throws IOException 异常
      */
     private void returnErrorResponseJson(ResponseCode responseCode, HttpServletResponse response, String directUrl, Object... args) throws Exception {
-        returnErrorResponseJson(responseCode, response, directUrl, true, args);
+        returnErrorResponseJson(true, responseCode, response, directUrl, args);
     }
 
     /**
@@ -214,7 +214,7 @@ public class JsonWebTokenValidFilter extends OncePerRequestFilter {
      * @throws IOException 异常
      */
     private void returnErrorResponseJson(ResponseCode responseCode, HttpServletResponse response, boolean isRemoveCookie, Object... args) throws Exception {
-        returnErrorResponseJson(responseCode, response, null, isRemoveCookie, args);
+        returnErrorResponseJson(false, responseCode, response, null, args);
     }
 
     /**
